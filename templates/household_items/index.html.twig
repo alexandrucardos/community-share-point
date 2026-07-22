@@ -5,12 +5,12 @@
 {% block body %}
     <main class="items-page">
         <div class="items-page__header">
-            <h1>My Items</h1>
-            <a class="button" href="{{ path('household_items_new') }}">Add item</a>
+            <h1>{{ 'My Items'|trans }}</h1>
+            <a class="button" href="{{ path('household_items_new') }}">{{ 'Add item'|trans }}</a>
         </div>
 
         {% if items is empty %}
-            <p class="items-empty">You haven't added any items yet. <a href="{{ path('household_items_new') }}">Add your first item</a>.</p>
+            <p class="items-empty">{{ "You haven't added any items yet."|trans }} <a href="{{ path('household_items_new') }}">{{ 'Add your first item'|trans }}</a>.</p>
         {% else %}
             <div class="items-grid">
                 {% for item in items %}
@@ -21,13 +21,13 @@
                             <div class="item-card__header">
                                 <h2 class="item-card__name">{{ item.name }}</h2>
                                 <span class="item-card__status item-card__status--{{ item.status|lower|replace({' ': '-'}) }}">
-                                    {{ item.status }}
+                                    {{ item.status|trans }}
                                 </span>
                             </div>
 
                             <p class="item-card__description">{{ item.description }}</p>
 
-                            <a class="item-card__edit" href="{{ path('household_items_edit', {id: item.id}) }}">Edit</a>
+                            <a class="item-card__edit" href="{{ path('household_items_edit', {id: item.id}) }}">{{ 'Edit'|trans }}</a>
                         </div>
                     </article>
                 {% endfor %}

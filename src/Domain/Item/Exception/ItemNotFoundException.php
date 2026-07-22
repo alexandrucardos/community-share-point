@@ -8,6 +8,6 @@ final class ItemNotFoundException extends \RuntimeException
 {
     public function __construct(string $id)
     {
-        parent::__construct(sprintf('No item found with id "%s".', $id));
+        parent::__construct('Item not found.');
     }
 }

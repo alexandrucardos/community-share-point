@@ -1,17 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ isEdit ? 'Edit item' : 'Add item' }}{% endblock %}
+{% block title %}{{ (isEdit ? 'Edit item' : 'Add item')|trans }}{% endblock %}
 
 {% block body %}
     <main class="auth-page">
         <div class="auth-card">
-            <h1>{{ isEdit ? 'Edit item' : 'Add item' }}</h1>
+            <h1>{{ (isEdit ? 'Edit item' : 'Add item')|trans }}</h1>
 
             {% if errors %}
                 <div class="auth-error">
                     <ul>
                         {% for error in errors %}
-                            <li>{{ error }}</li>
+                            <li>{{ error|trans }}</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -19,31 +19,31 @@
 
             <form method="post" action="{{ formAction }}" class="auth-form" enctype="multipart/form-data">
                 {% if currentImageUrl %}
-                    <img class="item-form-image" src="{{ currentImageUrl }}" alt="Current item image">
+                    <img class="item-form-image" src="{{ currentImageUrl }}" alt="{{ 'Photo'|trans }}">
                 {% endif %}
 
-                <label for="image">Photo</label>
+                <label for="image">{{ 'Photo'|trans }}</label>
                 <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp">
 
-                <label for="name">Name</label>
+                <label for="name">{{ 'Name'|trans }}</label>
                 <input type="text" id="name" name="name" value="{{ name }}" required autofocus>
 
-                <label for="description">Description</label>
+                <label for="description">{{ 'Description'|trans }}</label>
                 <textarea id="description" name="description" rows="4" required>{{ description }}</textarea>
 
-                <label for="status">Status</label>
+                <label for="status">{{ 'Status'|trans }}</label>
                 <select id="status" name="status">
                     {% for itemStatus in statuses %}
-                        <option value="{{ itemStatus.value }}"{{ itemStatus.value == status ? ' selected' : '' }}>{{ itemStatus.value }}</option>
+                        <option value="{{ itemStatus.value }}"{{ itemStatus.value == status ? ' selected' : '' }}>{{ itemStatus.value|trans }}</option>
                     {% endfor %}
                 </select>
 
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('item_form') }}">
 
-                <button type="submit">{{ isEdit ? 'Save changes' : 'Add item' }}</button>
+                <button type="submit">{{ (isEdit ? 'Save changes' : 'Add item')|trans }}</button>
             </form>
 
-            <p class="auth-switch"><a href="{{ path('household_items_index') }}">Back to My Items</a></p>
+            <p class="auth-switch"><a href="{{ path('household_items_index') }}">{{ 'Back to My Items'|trans }}</a></p>
         </div>
     </main>
 {% endblock %}

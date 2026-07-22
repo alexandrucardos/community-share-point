@@ -5,11 +5,11 @@
 {% block body %}
     <main class="items-page">
         <div class="items-page__header">
-            <h1>All Items</h1>
+            <h1>{{ 'All Items'|trans }}</h1>
         </div>
 
         {% if items is empty %}
-            <p class="items-empty">No items have been shared yet.</p>
+            <p class="items-empty">{{ 'No items have been shared yet.'|trans }}</p>
         {% else %}
             <div class="items-grid">
                 {% for item in items %}
@@ -20,12 +20,18 @@
                             <div class="item-card__header">
                                 <h2 class="item-card__name">{{ item.name }}</h2>
                                 <span class="item-card__status item-card__status--{{ item.status|lower|replace({' ': '-'}) }}">
-                                    {{ item.status }}
+                                    {{ item.status|trans }}
                                 </span>
                             </div>
 
                             <p class="item-card__description">{{ item.description }}</p>
-                            <p class="item-card__owner">Submitted by {{ item.submittedBy == app.user.userIdentifier ? 'you' : item.submittedBy }}</p>
+                            <p class="item-card__owner">
+                                {% if item.submittedBy == app.user.userIdentifier %}
+                                    {{ 'Submitted by you'|trans }}
+                                {% else %}
+                                    {{ 'Submitted by %email%'|trans({'%email%': item.submittedBy}) }}
+                                {% endif %}
+                            </p>
                         </div>
                     </article>
                 {% endfor %}
