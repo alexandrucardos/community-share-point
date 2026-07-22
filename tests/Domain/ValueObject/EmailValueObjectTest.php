@@ -45,6 +45,8 @@ final class EmailValueObjectTest extends TestCase
 
         $emailValueObject = new EmailValueObject($validator);
 
-        $emailValueObject->validate($value);
+        $emailValueObject($value);
+
+        self::assertSame($value, $emailValueObject->value);
     }
 }

@@ -8,13 +8,15 @@ use App\Domain\DTO\ConstraintDto;
 
 final readonly class EmailValueObject
 {
+    public mixed $value;
+
     public function __construct(
         private ValidatorInterface $validator
     )
     {
     }
 
-    public function validate(mixed $value): void
+    public function __invoke(mixed $value): void
     {
         $constraints = [
             new ConstraintDto(Constraint::NotNull),
@@ -28,5 +30,6 @@ final readonly class EmailValueObject
             $constraints
         );
 
+        $this->value = $value;
     }
 }
