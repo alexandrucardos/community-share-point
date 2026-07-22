@@ -22,7 +22,12 @@ final readonly class EmailValueObject
             new ConstraintDto(Constraint::NotNull),
             new ConstraintDto(Constraint::NotBlank),
             new ConstraintDto(Constraint::Email),
-            new ConstraintDto(Constraint::Length, [Constraint::LENGTH_MAX => 100])
+            new ConstraintDto(Constraint::Length,
+                [
+                    Constraint::LENGTH_MAX => 100,
+                    Constraint::LENGTH_MAX_MSG => 'user.email.max_length'
+                ]
+            )
         ];
 
         $this->validator->validate(

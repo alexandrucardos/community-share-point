@@ -4,9 +4,15 @@ namespace App\Service\ValidationService;
 
 use App\Domain\ValueObject\ValidatorInterface;
 use Symfony\Component\Validator\Validation;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class ValidatorService implements ValidatorInterface
 {
+    public function __construct(
+        private TranslatorInterface $translator)
+    {
+
+    }
     public function validate(
         mixed $value,
         /**
@@ -17,6 +23,7 @@ final readonly class ValidatorService implements ValidatorInterface
     {
         $validator = Validation::createValidatorBuilder()
             ->enableAttributeMapping()
+            ->setTranslator($this->translator)
             ->getValidator();
 
         $frameworkConstraints =[];

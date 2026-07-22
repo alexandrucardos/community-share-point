@@ -37,7 +37,11 @@ final class EmailValueObjectTest extends TestCase
                     self::assertSame([], $constraints[2]->properties);
 
                     self::assertSame(Constraint::Length, $constraints[3]->constraint);
-                    self::assertSame([Constraint::LENGTH_MAX => 100], $constraints[3]->properties);
+                    self::assertSame(
+                        [
+                            Constraint::LENGTH_MAX => 100,
+                            Constraint::LENGTH_MAX_MSG => 'user.email.max_length'
+                        ], $constraints[3]->properties);
 
                     return true;
                 })

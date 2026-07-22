@@ -1,0 +1,3 @@
+user:
+    email:
+        max_length: "Lungimea maxima permisa este de {{ limit }} de caractere."

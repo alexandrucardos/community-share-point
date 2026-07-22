@@ -10,5 +10,8 @@ enum Constraint
     case Length;
 
     const LENGTH_MAX = 'max';
+    const LENGTH_MAX_MSG = 'maxMessage';
     const LENGTH_MIN = 'min';
+    const LENGTH_MIN_MSG = 'minMessage';
+
 }

@@ -23,6 +23,8 @@ final readonly class ConstraintMapper
             Constraint::Length => new Length(
                 min: $properties[Constraint::LENGTH_MIN] ?? null,
                 max: $properties[Constraint::LENGTH_MAX] ?? null,
+                minMessage: $properties[Constraint::LENGTH_MIN_MSG] ?? null,
+                maxMessage: $properties[Constraint::LENGTH_MAX_MSG] ?? null,
             ),
         };
     }
