@@ -11,6 +11,8 @@ final readonly class UpdateUserCommand
         public string $currentPassword,
         public string $contactInfo,
         public ?string $newPassword = null,
+        public ?string $avatarFilename = null,
+        public bool $removeAvatar = false,
     ) {
     }
 }

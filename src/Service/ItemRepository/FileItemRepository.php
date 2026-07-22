@@ -6,15 +6,19 @@ namespace App\Service\ItemRepository;
 
 use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
+use Symfony\Component\Asset\Packages;
 
 final readonly class FileItemRepository implements ItemRepositoryInterface
 {
     private const array COLOR_PALETTE = ['2563eb', 'db2777', 'ea580c', '65a30d', '7c3aed', '0891b2'];
+    private const string IMAGE_SUBDIRECTORY = 'images/items';
 
     private string $storagePath;
 
-    public function __construct(string $projectDir)
-    {
+    public function __construct(
+        string $projectDir,
+        private Packages $assetPackages,
+    ) {
         $this->storagePath = $projectDir.'/var/data/items.json';
     }
 
@@ -65,6 +69,7 @@ final readonly class FileItemRepository implements ItemRepositoryInterface
             'name' => $item->getName(),
             'description' => $item->getDescription(),
             'status' => $item->getStatus(),
+            'imageFilename' => $item->getImageFilename(),
         ];
 
         $this->writeRecords($records);
@@ -77,14 +82,22 @@ final readonly class FileItemRepository implements ItemRepositoryInterface
         $item->setName($record['name']);
         $item->setDescription($record['description']);
         $item->setStatus($record['status']);
-        $item->setImageUrl($this->placeholderImage($record['name']));
+
+        $imageFilename = $record['imageFilename'] ?? '';
+        $item->setImageFilename($imageFilename);
+        $item->setImageUrl(
+            $imageFilename !== ''
+                ? $this->assetPackages->getUrl(self::IMAGE_SUBDIRECTORY.'/'.$imageFilename)
+                : $this->placeholderImage($record['name'])
+        );
 
         return $item;
     }
 
     private function placeholderImage(string $name): string
     {
-        $initials = strtoupper(substr($name, 0, 1).(strrpos($name, ' ') !== false ? $name[strrpos($name, ' ') + 1] : ''));
+        $words = preg_split('/\s+/', trim($name), -1, \PREG_SPLIT_NO_EMPTY);
+        $initials = strtoupper(($words[0][0] ?? '').($words[1][0] ?? ''));
         $color = self::COLOR_PALETTE[crc32($name) % count(self::COLOR_PALETTE)];
 
         $svg = <<<SVG

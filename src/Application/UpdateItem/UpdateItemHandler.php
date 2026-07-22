@@ -38,6 +38,10 @@ final readonly class UpdateItemHandler
         $item->setDescription($command->description);
         $item->setStatus($command->status->value);
 
+        if ($command->imageFilename !== null) {
+            $item->setImageFilename($command->imageFilename);
+        }
+
         $this->itemRepository->update($item);
     }
 }

@@ -13,6 +13,7 @@ final readonly class AddItemCommand
         public string $name,
         public string $description,
         public ItemStatus $status,
+        public ?string $imageFilename = null,
     ) {
     }
 }

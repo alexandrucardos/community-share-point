@@ -10,6 +10,7 @@ final class UserEntity
     private string $groupId;
     private EmailValueObject $email;
     private string $password;
+    private string $avatarFilename = '';
 
     public function __construct(
         //make this uuid
@@ -61,5 +62,15 @@ final class UserEntity
     public function setPassword(string $password): void
     {
         $this->password = $password;
+    }
+
+    public function getAvatarFilename(): string
+    {
+        return $this->avatarFilename;
+    }
+
+    public function setAvatarFilename(string $avatarFilename): void
+    {
+        $this->avatarFilename = $avatarFilename;
     }
 }

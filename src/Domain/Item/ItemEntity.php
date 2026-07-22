@@ -8,6 +8,7 @@ final class ItemEntity
     private string $description;
     private string $status;
     private string $imageUrl;
+    private string $imageFilename = '';
     private string $userId;
 
     public function __construct(
@@ -67,6 +68,16 @@ final class ItemEntity
     public function setImageUrl(string $imageUrl): void
     {
         $this->imageUrl = $imageUrl;
+    }
+
+    public function getImageFilename(): string
+    {
+        return $this->imageFilename;
+    }
+
+    public function setImageFilename(string $imageFilename): void
+    {
+        $this->imageFilename = $imageFilename;
     }
 
 }

@@ -18,3 +18,9 @@ bin/
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+ # User-uploaded images (runtime content, not a static asset)
+/assets/images/avatars/*
+!/assets/images/avatars/.gitkeep
+/assets/images/items/*
+!/assets/images/items/.gitkeep

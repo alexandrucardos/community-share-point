@@ -18,7 +18,21 @@
                 </div>
             {% endif %}
 
-            <form method="post" action="{{ path('account_edit') }}" class="auth-form">
+            <form method="post" action="{{ path('account_edit') }}" class="auth-form" enctype="multipart/form-data">
+                {% if avatarFilename %}
+                    <img class="account-avatar" src="{{ asset('images/avatars/' ~ avatarFilename) }}" alt="Your avatar">
+                {% endif %}
+
+                <label for="avatar">Profile picture</label>
+                <input type="file" id="avatar" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp">
+
+                {% if avatarFilename %}
+                    <label class="auth-checkbox">
+                        <input type="checkbox" name="remove_avatar" value="1">
+                        Remove profile picture
+                    </label>
+                {% endif %}
+
                 <label for="contactInfo">Contact info</label>
                 <input type="text" id="contactInfo" name="contactInfo" value="{{ contactInfo }}" placeholder="Phone number or address">
 

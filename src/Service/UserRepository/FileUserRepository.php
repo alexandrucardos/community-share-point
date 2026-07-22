@@ -65,6 +65,7 @@ final readonly class FileUserRepository implements UserRepositoryInterface
         $user->setPassword($record['password']);
         $user->setContactInfo($record['contactInfo']);
         $user->setGroupId($record['groupId']);
+        $user->setAvatarFilename($record['avatarFilename'] ?? '');
 
         return $user;
     }
@@ -79,6 +80,7 @@ final readonly class FileUserRepository implements UserRepositoryInterface
             'password' => $user->getPassword(),
             'contactInfo' => $user->getContactInfo(),
             'groupId' => $user->getGroupId(),
+            'avatarFilename' => $user->getAvatarFilename(),
         ];
 
         $this->writeRecords($records);

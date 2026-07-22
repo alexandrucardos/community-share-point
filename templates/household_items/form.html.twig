@@ -17,7 +17,14 @@
                 </div>
             {% endif %}
 
-            <form method="post" action="{{ formAction }}" class="auth-form">
+            <form method="post" action="{{ formAction }}" class="auth-form" enctype="multipart/form-data">
+                {% if currentImageUrl %}
+                    <img class="item-form-image" src="{{ currentImageUrl }}" alt="Current item image">
+                {% endif %}
+
+                <label for="image">Photo</label>
+                <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp">
+
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" value="{{ name }}" required autofocus>
 

@@ -18,6 +18,7 @@ use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\Item\ItemStatus;
 use App\Domain\User\UserEntity;
 use App\Infrastructure\Security\SecurityUser;
+use App\Service\Image\ImageUploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +26,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HouseholdItemsController extends AbstractController
 {
+    private const string IMAGE_SUBDIRECTORY = 'images/items';
+
     #[Route('/items', name: 'household_items_index', methods: ['GET'])]
     public function index(ListUserItemsHandler $listUserItemsHandler): Response
     {
@@ -42,27 +45,34 @@ final class HouseholdItemsController extends AbstractController
     }
 
     #[Route('/items/new', name: 'household_items_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, AddItemHandler $addItemHandler): Response
+    public function new(Request $request, AddItemHandler $addItemHandler, ImageUploader $imageUploader): Response
     {
         $errors = [];
         $name = '';
         $description = '';
         $status = ItemStatus::Available->value;
+        $currentImageUrl = null;
 
         if ($request->isMethod('POST')) {
             $name = (string) $request->request->get('name', '');
             $description = (string) $request->request->get('description', '');
             $status = (string) $request->request->get('status', '');
+            $imageFile = $request->files->get('image');
 
             if (!$this->isCsrfTokenValid('item_form', (string) $request->request->get('_csrf_token'))) {
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
+                    $imageFilename = $imageFile !== null
+                        ? $imageUploader->upload($imageFile, self::IMAGE_SUBDIRECTORY)
+                        : null;
+
                     $addItemHandler->handle(new AddItemCommand(
                         userId: $this->currentUser()->getId(),
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),
+                        imageFilename: $imageFilename,
                     ));
 
                     $this->addFlash('success', 'Item added.');
@@ -84,11 +94,12 @@ final class HouseholdItemsController extends AbstractController
             'status' => $status,
             'statuses' => ItemStatus::cases(),
             'isEdit' => false,
+            'currentImageUrl' => $currentImageUrl,
         ]);
     }
 
     #[Route('/items/{id}/edit', name: 'household_items_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, string $id, ItemRepositoryInterface $itemRepository, UpdateItemHandler $updateItemHandler): Response
+    public function edit(Request $request, string $id, ItemRepositoryInterface $itemRepository, UpdateItemHandler $updateItemHandler, ImageUploader $imageUploader): Response
     {
         $item = $itemRepository->findById($id);
 
@@ -100,22 +111,29 @@ final class HouseholdItemsController extends AbstractController
         $name = $item->getName();
         $description = $item->getDescription();
         $status = $item->getStatus();
+        $currentImageUrl = $item->getImageUrl();
 
         if ($request->isMethod('POST')) {
             $name = (string) $request->request->get('name', '');
             $description = (string) $request->request->get('description', '');
             $status = (string) $request->request->get('status', '');
+            $imageFile = $request->files->get('image');
 
             if (!$this->isCsrfTokenValid('item_form', (string) $request->request->get('_csrf_token'))) {
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
+                    $imageFilename = $imageFile !== null
+                        ? $imageUploader->upload($imageFile, self::IMAGE_SUBDIRECTORY)
+                        : null;
+
                     $updateItemHandler->handle(new UpdateItemCommand(
                         itemId: $id,
                         userId: $this->currentUser()->getId(),
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),
+                        imageFilename: $imageFilename,
                     ));
 
                     $this->addFlash('success', 'Item updated.');
@@ -137,6 +155,7 @@ final class HouseholdItemsController extends AbstractController
             'status' => $status,
             'statuses' => ItemStatus::cases(),
             'isEdit' => true,
+            'currentImageUrl' => $currentImageUrl,
         ]);
     }
 

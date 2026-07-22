@@ -19,8 +19,15 @@
         {% endif %}
     </head>
     <body>
-        <nav class="app-nav">
+        <nav class="app-nav" data-controller="mobile-menu">
             <a class="app-nav__brand" href="{{ app.user ? path('household_items_index') : path('app_login') }}">Community Share Point</a>
+
+            <button type="button" class="app-nav__burger" aria-label="Menu" aria-expanded="false" data-mobile-menu-target="button" data-action="mobile-menu#toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
             <div class="app-nav__links">
                 {% if app.user %}
                     <a href="{{ path('household_items_index') }}" class="app-nav__tab{{ app.request.attributes.get('_route') == 'household_items_index' ? ' app-nav__tab--active' : '' }}">My Items</a>

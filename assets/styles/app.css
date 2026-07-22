@@ -3,13 +3,21 @@ body {
     background-color: #f3f4f6;
     color: #111827;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding-top: 64px;
 }
 
 .app-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    box-sizing: border-box;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.5rem;
+    padding: 0 1.5rem;
     background: #ffffff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -24,6 +32,71 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.app-nav__burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.app-nav__burger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #111827;
+    border-radius: 2px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+@media (max-width: 640px) {
+    .app-nav__burger {
+        display: flex;
+    }
+
+    .app-nav__links {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease;
+    }
+
+    .app-nav--open .app-nav__links {
+        max-height: 320px;
+    }
+
+    .app-nav__links a {
+        padding: 0.9rem 1.5rem;
+    }
+
+    .app-nav--open .app-nav__burger span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .app-nav--open .app-nav__burger span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .app-nav--open .app-nav__burger span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
 }
 
 .app-nav__links a {
@@ -94,6 +167,23 @@ body {
     gap: 0.35rem;
 }
 
+.account-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 999px;
+    object-fit: cover;
+    align-self: center;
+    margin-bottom: 0.5rem;
+}
+
+.item-form-image {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
 .auth-form hr {
     width: 100%;
     border: none;
@@ -108,6 +198,16 @@ body {
     margin-top: 0.5rem;
 }
 
+.auth-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: #4b5563;
+    margin-top: 0.35rem;
+}
+
 .auth-form input,
 .auth-form textarea,
 .auth-form select {
@@ -116,6 +216,30 @@ body {
     border-radius: 0.5rem;
     font-size: 0.95rem;
     font-family: inherit;
+}
+
+.auth-form input[type="file"] {
+    padding: 0.4rem;
+    color: #4b5563;
+    font-size: 0.85rem;
+}
+
+.auth-form input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.45rem 0.9rem;
+    border: none;
+    border-radius: 0.4rem;
+    background: #eff2ff;
+    color: #2563eb;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.auth-form input[type="file"]::file-selector-button:hover {
+    background: #dfe4ff;
 }
 
 .auth-form textarea {

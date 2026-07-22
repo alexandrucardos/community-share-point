@@ -39,6 +39,12 @@ final readonly class UpdateUserHandler
 
         $user->setContactInfo($command->contactInfo);
 
+        if ($command->avatarFilename !== null) {
+            $user->setAvatarFilename($command->avatarFilename);
+        } elseif ($command->removeAvatar) {
+            $user->setAvatarFilename('');
+        }
+
         $this->userRepository->update($user);
     }
 }

@@ -14,6 +14,7 @@ final readonly class UpdateItemCommand
         public string $name,
         public string $description,
         public ItemStatus $status,
+        public ?string $imageFilename = null,
     ) {
     }
 }
