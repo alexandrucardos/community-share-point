@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Account settings{% endblock %}
+
+{% block body %}
+    <main class="auth-page">
+        <div class="auth-card">
+            <h1>Account settings</h1>
+            <p class="auth-switch">Signed in as {{ email }}</p>
+
+            {% if errors %}
+                <div class="auth-error">
+                    <ul>
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ path('account_edit') }}" class="auth-form">
+                <label for="contactInfo">Contact info</label>
+                <input type="text" id="contactInfo" name="contactInfo" value="{{ contactInfo }}" placeholder="Phone number or address">
+
+                <hr>
+
+                <label for="new_password">New password</label>
+                <input type="password" id="new_password" name="new_password" minlength="8" placeholder="Leave blank to keep current password">
+
+                <label for="new_password_confirmation">Confirm new password</label>
+                <input type="password" id="new_password_confirmation" name="new_password_confirmation" minlength="8">
+
+                <label for="current_password">Current password</label>
+                <input type="password" id="current_password" name="current_password" required placeholder="Required to save changes">
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('account_update') }}">
+
+                <button type="submit">Save changes</button>
+            </form>
+        </div>
+    </main>
+{% endblock %}

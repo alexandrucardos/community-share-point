@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}All Items{% endblock %}
+
+{% block body %}
+    <main class="items-page">
+        <div class="items-page__header">
+            <h1>All Items</h1>
+        </div>
+
+        {% if items is empty %}
+            <p class="items-empty">No items have been shared yet.</p>
+        {% else %}
+            <div class="items-grid">
+                {% for item in items %}
+                    <article class="item-card">
+                        <img class="item-card__image" src="{{ item.imageUrl }}" alt="{{ item.name }}">
+
+                        <div class="item-card__body">
+                            <div class="item-card__header">
+                                <h2 class="item-card__name">{{ item.name }}</h2>
+                                <span class="item-card__status item-card__status--{{ item.status|lower|replace({' ': '-'}) }}">
+                                    {{ item.status }}
+                                </span>
+                            </div>
+
+                            <p class="item-card__description">{{ item.description }}</p>
+                            <p class="item-card__owner">Submitted by {{ item.submittedBy == app.user.userIdentifier ? 'you' : item.submittedBy }}</p>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </main>
+{% endblock %}

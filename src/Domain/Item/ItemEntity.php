@@ -8,6 +8,7 @@ final class ItemEntity
     private string $description;
     private string $status;
     private string $imageUrl;
+    private string $userId;
 
     public function __construct(
         private string $id,
@@ -16,6 +17,16 @@ final class ItemEntity
     public function getId(): string
     {
         return $this->id;
+    }
+
+    public function getUserId(): string
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(string $userId): void
+    {
+        $this->userId = $userId;
     }
 
     public function getName(): string

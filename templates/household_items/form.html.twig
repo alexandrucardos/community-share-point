@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ isEdit ? 'Edit item' : 'Add item' }}{% endblock %}
+
+{% block body %}
+    <main class="auth-page">
+        <div class="auth-card">
+            <h1>{{ isEdit ? 'Edit item' : 'Add item' }}</h1>
+
+            {% if errors %}
+                <div class="auth-error">
+                    <ul>
+                        {% for error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ formAction }}" class="auth-form">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" value="{{ name }}" required autofocus>
+
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4" required>{{ description }}</textarea>
+
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    {% for itemStatus in statuses %}
+                        <option value="{{ itemStatus.value }}"{{ itemStatus.value == status ? ' selected' : '' }}>{{ itemStatus.value }}</option>
+                    {% endfor %}
+                </select>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('item_form') }}">
+
+                <button type="submit">{{ isEdit ? 'Save changes' : 'Add item' }}</button>
+            </form>
+
+            <p class="auth-switch"><a href="{{ path('household_items_index') }}">Back to My Items</a></p>
+        </div>
+    </main>
+{% endblock %}

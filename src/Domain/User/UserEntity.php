@@ -2,11 +2,13 @@
 
 namespace App\Domain\User;
 
+use App\Domain\ValueObject\EmailValueObject;
+
 final class UserEntity
 {
     private string $contactInfo;
     private string $groupId;
-    private string $email;
+    private EmailValueObject $email;
     private string $password;
 
     public function __construct(
@@ -41,12 +43,12 @@ final class UserEntity
         $this->groupId = $groupId;
     }
 
-    public function getEmail(): string
+    public function getEmail(): EmailValueObject
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+    public function setEmail(EmailValueObject $email): void
     {
         $this->email = $email;
     }

@@ -13,5 +13,6 @@ enum Constraint
     const LENGTH_MAX_MSG = 'maxMessage';
     const LENGTH_MIN = 'min';
     const LENGTH_MIN_MSG = 'minMessage';
+    const NOT_BLANK_MSG = 'message';
 
 }

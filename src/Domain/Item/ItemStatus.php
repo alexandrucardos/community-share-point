@@ -1,0 +1,13 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domain\Item;
+
+enum ItemStatus: string
+{
+    case Available = 'Available';
+    case InUse = 'In Use';
+    case NeedsRepair = 'Needs Repair';
+    case Reserved = 'Reserved';
+}

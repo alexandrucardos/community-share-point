@@ -16,7 +16,7 @@ final readonly class EmailValueObject
     {
     }
 
-    public function __invoke(mixed $value): void
+    public function __invoke(mixed $value): self
     {
         $constraints = [
             new ConstraintDto(Constraint::NotNull),
@@ -36,5 +36,17 @@ final readonly class EmailValueObject
         );
 
         $this->value = $value;
+
+        return $this;
+    }
+
+    public function __serialize(): array
+    {
+        return ['value' => $this->value];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->value = $data['value'];
     }
 }

@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\ListGroupItems;
 
-class ListGroupItemsQuery
+final readonly class ListGroupItemsQuery
 {
-
+    public function __construct(
+        public string $groupId,
+    ) {
+    }
 }

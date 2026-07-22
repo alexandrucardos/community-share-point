@@ -1,3 +1,12 @@
 user:
     email:
         max_length: "Lungimea maxima permisa este de {{ limit }} de caractere."
+    password:
+        min_length: "Parola trebuie sa aiba minim {{ limit }} caractere."
+item:
+    name:
+        not_blank: "Numele articolului este obligatoriu."
+        max_length: "Numele poate avea maxim {{ limit }} caractere."
+    description:
+        not_blank: "Descrierea este obligatorie."
+        max_length: "Descrierea poate avea maxim {{ limit }} caractere."

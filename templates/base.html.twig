@@ -19,6 +19,27 @@
         {% endif %}
     </head>
     <body>
+        <nav class="app-nav">
+            <a class="app-nav__brand" href="{{ app.user ? path('household_items_index') : path('app_login') }}">Community Share Point</a>
+            <div class="app-nav__links">
+                {% if app.user %}
+                    <a href="{{ path('household_items_index') }}" class="app-nav__tab{{ app.request.attributes.get('_route') == 'household_items_index' ? ' app-nav__tab--active' : '' }}">My Items</a>
+                    <a href="{{ path('household_items_group') }}" class="app-nav__tab{{ app.request.attributes.get('_route') == 'household_items_group' ? ' app-nav__tab--active' : '' }}">All Items</a>
+                    <a href="{{ path('account_edit') }}" class="app-nav__tab{{ app.request.attributes.get('_route') == 'account_edit' ? ' app-nav__tab--active' : '' }}">Account</a>
+                    <a href="{{ path('app_logout') }}">Log out</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}">Log in</a>
+                    <a href="{{ path('app_register') }}">Sign up</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash flash--{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
         {% block body %}{% endblock %}
     </body>
 </html>

@@ -8,8 +8,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class ValidatorService implements ValidatorInterface
 {
-    public function __construct(
-        private TranslatorInterface $translator)
+    public function __construct(private TranslatorInterface $translator)
     {
 
     }

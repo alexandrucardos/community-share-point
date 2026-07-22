@@ -18,7 +18,9 @@ final readonly class ConstraintMapper
     {
         return match ($constraint){
             Constraint::NotNull => new NotNull(),
-            Constraint::NotBlank => new NotBlank(),
+            Constraint::NotBlank => new NotBlank(
+                message: $properties[Constraint::NOT_BLANK_MSG] ?? null,
+            ),
             Constraint::Email => new Email(),
             Constraint::Length => new Length(
                 min: $properties[Constraint::LENGTH_MIN] ?? null,
