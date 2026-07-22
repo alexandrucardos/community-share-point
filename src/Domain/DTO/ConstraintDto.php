@@ -10,6 +10,5 @@ final readonly class ConstraintDto
         public Constraint $constraint,
         public array $properties = [],
     ){
-
     }
 }

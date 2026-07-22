@@ -8,4 +8,7 @@ enum Constraint
     case NotNull;
     case Email;
     case Length;
+
+    const LENGTH_MAX = 'max';
+    const LENGTH_MIN = 'min';
 }

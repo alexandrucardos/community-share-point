@@ -8,7 +8,7 @@ use App\Domain\DTO\ConstraintDto;
 
 final readonly class EmailValueObject
 {
-    private function __construct(
+    public function __construct(
         private ValidatorInterface $validator
     )
     {
@@ -20,7 +20,7 @@ final readonly class EmailValueObject
             new ConstraintDto(Constraint::NotNull),
             new ConstraintDto(Constraint::NotBlank),
             new ConstraintDto(Constraint::Email),
-            new ConstraintDto(Constraint::Length, ['max' => 100])
+            new ConstraintDto(Constraint::Length, [Constraint::LENGTH_MAX => 100])
         ];
 
         $this->validator->validate(
