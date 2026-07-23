@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HouseholdItemsController extends AbstractController
 {
-    private const string IMAGE_SUBDIRECTORY = 'images/items';
+    private const IMAGE_SUBDIRECTORY = 'images/items';
 
     #[Route('/items', name: 'household_items_index', methods: ['GET'])]
     public function index(ListUserItemsHandler $listUserItemsHandler): Response

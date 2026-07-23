@@ -10,12 +10,12 @@ use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\ValueObject\PasswordValueObject;
 
-final readonly class UpdateUserHandler
+final class UpdateUserHandler
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository,
-        private PasswordHasherInterface $passwordHasher,
-        private PasswordValueObject $passwordValidator,
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly PasswordHasherInterface $passwordHasher,
+        private readonly PasswordValueObject $passwordValidator,
     ) {
     }
 

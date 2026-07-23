@@ -10,12 +10,12 @@ use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\ValueObject\ItemDescriptionValueObject;
 use App\Domain\ValueObject\ItemNameValueObject;
 
-final readonly class UpdateItemHandler
+final class UpdateItemHandler
 {
     public function __construct(
-        private ItemRepositoryInterface $itemRepository,
-        private ItemNameValueObject $nameValidator,
-        private ItemDescriptionValueObject $descriptionValidator,
+        private readonly ItemRepositoryInterface $itemRepository,
+        private readonly ItemNameValueObject $nameValidator,
+        private readonly ItemDescriptionValueObject $descriptionValidator,
     ) {
     }
 

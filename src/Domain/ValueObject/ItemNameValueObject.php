@@ -6,12 +6,12 @@ namespace App\Domain\ValueObject;
 
 use App\Domain\DTO\ConstraintDto;
 
-final readonly class ItemNameValueObject
+final class ItemNameValueObject
 {
-    public mixed $value;
+    public readonly mixed $value;
 
     public function __construct(
-        private ValidatorInterface $validator
+        private readonly ValidatorInterface $validator
     )
     {
     }

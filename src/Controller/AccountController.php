@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class AccountController extends AbstractController
 {
-    private const string AVATAR_SUBDIRECTORY = 'images/avatars';
+    private const AVATAR_SUBDIRECTORY = 'images/avatars';
 
     #[Route('/account', name: 'account_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, UpdateUserHandler $updateUserHandler, ImageUploader $imageUploader): Response

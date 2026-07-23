@@ -7,10 +7,10 @@ namespace App\Application\ListUserItems;
 use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
 
-final readonly class ListUserItemsHandler
+final class ListUserItemsHandler
 {
     public function __construct(
-        private ItemRepositoryInterface $itemRepository,
+        private readonly ItemRepositoryInterface $itemRepository,
     ) {
     }
 

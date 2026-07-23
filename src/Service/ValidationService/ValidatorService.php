@@ -3,12 +3,15 @@
 namespace App\Service\ValidationService;
 
 use App\Domain\ValueObject\ValidatorInterface;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\EmailValidator;
+use Symfony\Component\Validator\ConstraintValidatorFactory;
 use Symfony\Component\Validator\Validation;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final readonly class ValidatorService implements ValidatorInterface
+final class ValidatorService implements ValidatorInterface
 {
-    public function __construct(private TranslatorInterface $translator)
+    public function __construct(private readonly TranslatorInterface $translator)
     {
 
     }
@@ -23,6 +26,9 @@ final readonly class ValidatorService implements ValidatorInterface
         $validator = Validation::createValidatorBuilder()
             ->enableAttributeMapping()
             ->setTranslator($this->translator)
+            ->setConstraintValidatorFactory(new ConstraintValidatorFactory([
+                Email::class.'Validator' => new EmailValidator(Email::VALIDATION_MODE_HTML5),
+            ]))
             ->getValidator();
 
         $frameworkConstraints =[];

@@ -7,13 +7,13 @@ namespace App\Service\Image;
 use App\Domain\UuidInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
-final readonly class ImageUploader
+final class ImageUploader
 {
-    private const array ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
     public function __construct(
-        private string $projectDir,
-        private UuidInterface $uuid,
+        private readonly string $projectDir,
+        private readonly UuidInterface $uuid,
     ) {
     }
 

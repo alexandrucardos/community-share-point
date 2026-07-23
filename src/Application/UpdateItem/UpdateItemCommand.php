@@ -6,15 +6,15 @@ namespace App\Application\UpdateItem;
 
 use App\Domain\Item\ItemStatus;
 
-final readonly class UpdateItemCommand
+final class UpdateItemCommand
 {
     public function __construct(
-        public string $itemId,
-        public string $userId,
-        public string $name,
-        public string $description,
-        public ItemStatus $status,
-        public ?string $imageFilename = null,
+        public readonly string $itemId,
+        public readonly string $userId,
+        public readonly string $name,
+        public readonly string $description,
+        public readonly ItemStatus $status,
+        public readonly ?string $imageFilename = null,
     ) {
     }
 }

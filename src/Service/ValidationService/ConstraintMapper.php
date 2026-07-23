@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraint as FrameworkConstraint;
 
-final readonly class ConstraintMapper
+final class ConstraintMapper
 {
     public static function fetchAssert(
         Constraint $constraint,
@@ -21,7 +21,7 @@ final readonly class ConstraintMapper
             Constraint::NotBlank => new NotBlank(
                 message: $properties[Constraint::NOT_BLANK_MSG] ?? null,
             ),
-            Constraint::Email => new Email(),
+            Constraint::Email => new Email(mode: Email::VALIDATION_MODE_HTML5),
             Constraint::Length => new Length(
                 min: $properties[Constraint::LENGTH_MIN] ?? null,
                 max: $properties[Constraint::LENGTH_MAX] ?? null,

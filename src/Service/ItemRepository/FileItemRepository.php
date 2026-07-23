@@ -8,16 +8,16 @@ use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
 use Symfony\Component\Asset\Packages;
 
-final readonly class FileItemRepository implements ItemRepositoryInterface
+final class FileItemRepository implements ItemRepositoryInterface
 {
-    private const array COLOR_PALETTE = ['2563eb', 'db2777', 'ea580c', '65a30d', '7c3aed', '0891b2'];
-    private const string IMAGE_SUBDIRECTORY = 'images/items';
+    private const COLOR_PALETTE = ['2563eb', 'db2777', 'ea580c', '65a30d', '7c3aed', '0891b2'];
+    private const IMAGE_SUBDIRECTORY = 'images/items';
 
-    private string $storagePath;
+    private readonly string $storagePath;
 
     public function __construct(
         string $projectDir,
-        private Packages $assetPackages,
+        private readonly Packages $assetPackages,
     ) {
         $this->storagePath = $projectDir.'/var/data/items.json';
     }

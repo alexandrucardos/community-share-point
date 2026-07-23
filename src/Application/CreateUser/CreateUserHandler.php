@@ -12,14 +12,14 @@ use App\Domain\UuidInterface;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
 
-final readonly class CreateUserHandler
+final class CreateUserHandler
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository,
-        private PasswordHasherInterface $passwordHasher,
-        private EmailValueObject $emailValidator,
-        private PasswordValueObject $passwordValidator,
-        private UuidInterface $uuid,
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly PasswordHasherInterface $passwordHasher,
+        private readonly EmailValueObject $emailValidator,
+        private readonly PasswordValueObject $passwordValidator,
+        private readonly UuidInterface $uuid,
     ) {
     }
 

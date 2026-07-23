@@ -9,10 +9,10 @@ use App\Domain\ValueObject\PasswordValueObject;
 use App\Infrastructure\Security\SecurityUser;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
-final readonly class PasswordHasherService implements PasswordHasherInterface
+final class PasswordHasherService implements PasswordHasherInterface
 {
     public function __construct(
-        private PasswordHasherFactoryInterface $passwordHasherFactory,
+        private readonly PasswordHasherFactoryInterface $passwordHasherFactory,
     ) {
     }
 

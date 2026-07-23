@@ -9,13 +9,13 @@ use App\Domain\User\UserRepositoryInterface;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\ValidatorInterface;
 
-final readonly class FileUserRepository implements UserRepositoryInterface
+final class FileUserRepository implements UserRepositoryInterface
 {
-    private string $storagePath;
+    private readonly string $storagePath;
 
     public function __construct(
         string $projectDir,
-        private ValidatorInterface $validator,
+        private readonly ValidatorInterface $validator,
     ) {
         $this->storagePath = $projectDir.'/var/data/users.json';
     }

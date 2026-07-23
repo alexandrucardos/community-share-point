@@ -10,13 +10,13 @@ use App\Domain\UuidInterface;
 use App\Domain\ValueObject\ItemDescriptionValueObject;
 use App\Domain\ValueObject\ItemNameValueObject;
 
-final readonly class AddItemHandler
+final class AddItemHandler
 {
     public function __construct(
-        private ItemRepositoryInterface $itemRepository,
-        private ItemNameValueObject $nameValidator,
-        private ItemDescriptionValueObject $descriptionValidator,
-        private UuidInterface $uuid,
+        private readonly ItemRepositoryInterface $itemRepository,
+        private readonly ItemNameValueObject $nameValidator,
+        private readonly ItemDescriptionValueObject $descriptionValidator,
+        private readonly UuidInterface $uuid,
     ) {
     }
 

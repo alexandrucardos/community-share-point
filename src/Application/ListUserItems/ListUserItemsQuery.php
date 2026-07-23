@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Application\ListUserItems;
 
-final readonly class ListUserItemsQuery
+final class ListUserItemsQuery
 {
     public function __construct(
-        public string $userId,
+        public readonly string $userId,
     ) {
     }
 }

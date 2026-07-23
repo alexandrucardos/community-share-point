@@ -10,11 +10,11 @@ use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\ValueObject\EmailValueObject;
 
-final readonly class ListGroupItemsHandler
+final class ListGroupItemsHandler
 {
     public function __construct(
-        private ItemRepositoryInterface $itemRepository,
-        private UserRepositoryInterface $userRepository,
+        private readonly ItemRepositoryInterface $itemRepository,
+        private readonly UserRepositoryInterface $userRepository,
     ) {
     }
 

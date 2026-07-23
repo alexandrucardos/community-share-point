@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Application\ListGroupItems;
 
-final readonly class ListGroupItemsQuery
+final class ListGroupItemsQuery
 {
     public function __construct(
-        public string $groupId,
+        public readonly string $groupId,
     ) {
     }
 }

@@ -4,11 +4,11 @@ namespace App\Domain\DTO;
 
 use App\Domain\ValueObject\Constraint;
 
-final readonly class ConstraintDto
+final class ConstraintDto
 {
     public function __construct(
-        public Constraint $constraint,
-        public array $properties = [],
+        public readonly Constraint $constraint,
+        public readonly array $properties = [],
     ){
     }
 }
