@@ -26,10 +26,10 @@
 
                             <p class="item-card__description">{{ item.description }}</p>
                             <p class="item-card__owner">
-                                {% if item.contactInfo == app.user.userIdentifier %}
-                                    {{ 'Contact info'|trans }}
+                                {% if item.userId == currentUserId %}
+                                    {{ 'Submitted by you'|trans }}
                                 {% else %}
-                                    {{ 'Contact info %contact_info%'|trans({'%contact_info%': item.contactInfo}) }}
+                                    {{ 'Submitted by %contact_info%'|trans({'%contact_info%': item.contactInfo}) }}
                                 {% endif %}
                             </p>
                         </div>
