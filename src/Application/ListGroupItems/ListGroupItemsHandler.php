@@ -8,7 +8,6 @@ use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
-use App\Domain\ValueObject\EmailValueObject;
 
 final class ListGroupItemsHandler
 {
@@ -25,12 +24,12 @@ final class ListGroupItemsHandler
     {
         $groupUsers = $this->userRepository->findAllByGroupId($query->groupId);
 
-        $emailsByUserId = array_combine(
+        $contactInfoByUserId = array_combine(
             array_map(static fn (UserEntity $user): string => $user->getId(), $groupUsers),
-            array_map(static fn (UserEntity $user): EmailValueObject => $user->getEmail(), $groupUsers),
+            array_map(static fn (UserEntity $user): string => $user->getContactInfo(), $groupUsers),
         );
 
-        $items = $this->itemRepository->findAllByUserIds(array_keys($emailsByUserId));
+        $items = $this->itemRepository->findAllByUserIds(array_keys($contactInfoByUserId));
 
         return array_map(
             static fn (ItemEntity $item): ListGroupItemsDto => new ListGroupItemsDto(
@@ -39,7 +38,8 @@ final class ListGroupItemsHandler
                 status: $item->getStatus(),
                 description: $item->getDescription(),
                 imageUrl: $item->getImageUrl(),
-                submittedBy: (string) (($emailsByUserId[$item->getUserId()] ?? null)?->value ?? 'Unknown'),
+                userId: $item->getUserId(),
+                contactInfo: $contactInfoByUserId[$item->getUserId()] ?? 'Unknown',
             ),
             $items
         );

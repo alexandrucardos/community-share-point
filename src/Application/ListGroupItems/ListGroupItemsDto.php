@@ -12,7 +12,8 @@ final class ListGroupItemsDto
         public readonly string $status,
         public readonly string $description,
         public readonly string $imageUrl,
-        public readonly string $submittedBy,
+        public readonly string $userId,
+        public readonly string $contactInfo,
     ) {
     }
 }

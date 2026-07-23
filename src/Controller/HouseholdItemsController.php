@@ -41,6 +41,7 @@ final class HouseholdItemsController extends AbstractController
     {
         return $this->render('household_items/group.html.twig', [
             'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($this->currentUser()->getGroupId())),
+            'currentUserId' => $this->currentUser()->getId(),
         ]);
     }
 
