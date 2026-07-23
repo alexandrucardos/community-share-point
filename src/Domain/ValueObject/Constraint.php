@@ -8,6 +8,7 @@ enum Constraint
     case NotNull;
     case Email;
     case Length;
+    case Uuid;
 
     const LENGTH_MAX = 'max';
     const LENGTH_MAX_MSG = 'maxMessage';

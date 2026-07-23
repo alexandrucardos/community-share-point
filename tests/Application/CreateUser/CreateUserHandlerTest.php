@@ -57,7 +57,7 @@ final class CreateUserHandlerTest extends TestCase
                 self::assertSame('john.doe@example.com', $user->getEmail()->value);
                 self::assertSame('+40 700 000 000', $user->getContactInfo());
                 self::assertSame('hashed-password', $user->getPassword());
-                self::assertNotSame('', $user->getId());
+                self::assertNotSame('', $user->getId()->value);
 
                 return true;
             }));

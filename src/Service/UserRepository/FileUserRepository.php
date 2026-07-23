@@ -7,6 +7,7 @@ namespace App\Service\UserRepository;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\ValueObject\EmailValueObject;
+use App\Domain\ValueObject\UuidValueObject;
 use App\Domain\ValueObject\ValidatorInterface;
 
 final class FileUserRepository implements UserRepositoryInterface
@@ -60,8 +61,12 @@ final class FileUserRepository implements UserRepositoryInterface
 
     private function mapRecordToUser(array $record): UserEntity
     {
-        $user = new UserEntity($record['id']);
-        $user->setEmail((new EmailValueObject($this->validator))($record['email']));
+        $user = new UserEntity(
+            (new UuidValueObject($this->validator))($record['id'])
+        );
+        $user->setEmail(
+            (new EmailValueObject($this->validator))($record['email'])
+        );
         $user->setPassword($record['password']);
         $user->setContactInfo($record['contactInfo'] ?? '');
         $user->setGroupId($record['groupId'] ?? '');
@@ -75,7 +80,7 @@ final class FileUserRepository implements UserRepositoryInterface
         $records = $this->readRecords();
 
         $records[$user->getEmail()->value] = [
-            'id' => $user->getId(),
+            'id' => $user->getId()->value,
             'email' => $user->getEmail()->value,
             'password' => $user->getPassword(),
             'contactInfo' => $user->getContactInfo(),

@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraint as FrameworkConstraint;
+use Symfony\Component\Validator\Constraints\Uuid;
 
 final class ConstraintMapper
 {
@@ -28,6 +29,7 @@ final class ConstraintMapper
                 minMessage: $properties[Constraint::LENGTH_MIN_MSG] ?? null,
                 maxMessage: $properties[Constraint::LENGTH_MAX_MSG] ?? null,
             ),
+            Constraint::Uuid => new Uuid(),
         };
     }
 }

@@ -12,6 +12,7 @@ use App\Domain\UuidInterface;
 use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
+use App\Domain\ValueObject\UuidValueObject;
 
 final class CreateUserHandler
 {
@@ -21,6 +22,7 @@ final class CreateUserHandler
         private readonly EmailValueObject $emailValidator,
         private readonly PasswordValueObject $passwordValidator,
         private readonly ContactInfoValueObject $contactInfoValidator,
+        private readonly UuidValueObject $uuidValueObject,
         private readonly UuidInterface $uuid,
     ) {
     }
@@ -34,7 +36,7 @@ final class CreateUserHandler
             throw new EmailAlreadyRegisteredException($command->email);
         }
 
-        $user = new UserEntity($this->uuid->generate());
+        $user = new UserEntity(($this->uuidValueObject)($this->uuid->generate()));
         $user->setEmail(($this->emailValidator)($command->email));
         $user->setContactInfo($contactInfoVO->value);
         //todo add a vo for hasher

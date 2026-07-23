@@ -62,7 +62,7 @@ final class FileUserRepositoryTest extends TestCase
         $found = $repository->findByEmail('jane.doe@example.com');
 
         self::assertNotNull($found);
-        self::assertSame('user-id', $found->getId());
+        self::assertSame('user-id', $found->getId()->value);
         self::assertSame('jane.doe@example.com', $found->getEmail()->value);
         self::assertSame('hashed-password', $found->getPassword());
         self::assertSame('+40 700 000 000', $found->getContactInfo());

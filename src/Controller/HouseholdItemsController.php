@@ -32,7 +32,7 @@ final class HouseholdItemsController extends AbstractController
     public function index(ListUserItemsHandler $listUserItemsHandler): Response
     {
         return $this->render('household_items/index.html.twig', [
-            'items' => $listUserItemsHandler->handle(new ListUserItemsQuery($this->currentUser()->getId())),
+            'items' => $listUserItemsHandler->handle(new ListUserItemsQuery($this->currentUser()->getId()->value)),
         ]);
     }
 
@@ -41,7 +41,7 @@ final class HouseholdItemsController extends AbstractController
     {
         return $this->render('household_items/group.html.twig', [
             'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($this->currentUser()->getGroupId())),
-            'currentUserId' => $this->currentUser()->getId(),
+            'currentUserId' => $this->currentUser()->getId()->value,
         ]);
     }
 
@@ -69,7 +69,7 @@ final class HouseholdItemsController extends AbstractController
                         : null;
 
                     $addItemHandler->handle(new AddItemCommand(
-                        userId: $this->currentUser()->getId(),
+                        userId: $this->currentUser()->getId()->value,
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),
@@ -104,7 +104,7 @@ final class HouseholdItemsController extends AbstractController
     {
         $item = $itemRepository->findById($id);
 
-        if ($item === null || $item->getUserId() !== $this->currentUser()->getId()) {
+        if ($item === null || $item->getUserId() !== $this->currentUser()->getId()->value) {
             throw $this->createNotFoundException('Item not found.');
         }
 
@@ -130,7 +130,7 @@ final class HouseholdItemsController extends AbstractController
 
                     $updateItemHandler->handle(new UpdateItemCommand(
                         itemId: $id,
-                        userId: $this->currentUser()->getId(),
+                        userId: $this->currentUser()->getId()->value,
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),

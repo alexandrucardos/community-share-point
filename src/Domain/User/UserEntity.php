@@ -3,6 +3,7 @@
 namespace App\Domain\User;
 
 use App\Domain\ValueObject\EmailValueObject;
+use App\Domain\ValueObject\UuidValueObject;
 
 final class UserEntity
 {
@@ -13,13 +14,12 @@ final class UserEntity
     private string $avatarFilename = '';
 
     public function __construct(
-        //make this uuid
-        private string $id,
+        private readonly UuidValueObject $id,
     )
     {
     }
 
-    public function getId(): string
+    public function getId(): UuidValueObject
     {
         return $this->id;
     }

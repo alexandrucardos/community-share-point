@@ -25,7 +25,7 @@ final class ListGroupItemsHandler
         $groupUsers = $this->userRepository->findAllByGroupId($query->groupId);
 
         $contactInfoByUserId = array_combine(
-            array_map(static fn (UserEntity $user): string => $user->getId(), $groupUsers),
+            array_map(static fn (UserEntity $user): string => $user->getId()->value, $groupUsers),
             array_map(static fn (UserEntity $user): string => $user->getContactInfo(), $groupUsers),
         );
 
