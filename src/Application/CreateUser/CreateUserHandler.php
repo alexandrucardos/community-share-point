@@ -9,6 +9,7 @@ use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\UuidInterface;
+use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
 
@@ -19,6 +20,7 @@ final class CreateUserHandler
         private readonly PasswordHasherInterface $passwordHasher,
         private readonly EmailValueObject $emailValidator,
         private readonly PasswordValueObject $passwordValidator,
+        private readonly ContactInfoValueObject $contactInfoValidator,
         private readonly UuidInterface $uuid,
     ) {
     }
@@ -26,6 +28,7 @@ final class CreateUserHandler
     public function handle(CreateUserCommand $command): void
     {
         $passwordVO = ($this->passwordValidator)($command->plainPassword);
+        $contactInfoVO = ($this->contactInfoValidator)($command->contactInfo);
 
         if ($this->userRepository->findByEmail($command->email) !== null) {
             throw new EmailAlreadyRegisteredException($command->email);
@@ -33,8 +36,7 @@ final class CreateUserHandler
 
         $user = new UserEntity($this->uuid->generate());
         $user->setEmail(($this->emailValidator)($command->email));
-        //todo add a VO for contact info
-        $user->setContactInfo($command->contactInfo);
+        $user->setContactInfo($contactInfoVO->value);
         //todo add a vo for hasher
         $user->setPassword($this->passwordHasher->hash($passwordVO));
         //todo add a group_id

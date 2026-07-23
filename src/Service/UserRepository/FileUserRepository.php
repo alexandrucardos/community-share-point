@@ -63,8 +63,8 @@ final class FileUserRepository implements UserRepositoryInterface
         $user = new UserEntity($record['id']);
         $user->setEmail((new EmailValueObject($this->validator))($record['email']));
         $user->setPassword($record['password']);
-        $user->setContactInfo($record['contactInfo']);
-        $user->setGroupId($record['groupId']);
+        $user->setContactInfo($record['contactInfo'] ?? '');
+        $user->setGroupId($record['groupId'] ?? '');
         $user->setAvatarFilename($record['avatarFilename'] ?? '');
 
         return $user;

@@ -8,6 +8,7 @@ use App\Domain\User\Exception\InvalidCurrentPasswordException;
 use App\Domain\User\Exception\UserNotFoundException;
 use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserRepositoryInterface;
+use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
 
 final class UpdateUserHandler
@@ -16,6 +17,7 @@ final class UpdateUserHandler
         private readonly UserRepositoryInterface $userRepository,
         private readonly PasswordHasherInterface $passwordHasher,
         private readonly PasswordValueObject $passwordValidator,
+        private readonly ContactInfoValueObject $contactInfoValidator,
     ) {
     }
 
@@ -37,7 +39,8 @@ final class UpdateUserHandler
             $user->setPassword($this->passwordHasher->hash($passwordVO));
         }
 
-        $user->setContactInfo($command->contactInfo);
+        $contactInfoVO = ($this->contactInfoValidator)($command->contactInfo);
+        $user->setContactInfo($contactInfoVO->value);
 
         if ($command->avatarFilename !== null) {
             $user->setAvatarFilename($command->avatarFilename);

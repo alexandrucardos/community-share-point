@@ -3,6 +3,9 @@ user:
         max_length: "Lungimea maxima permisa este de {{ limit }} de caractere."
     password:
         min_length: "Parola trebuie sa aiba minim {{ limit }} caractere."
+    contact_info:
+        not_blank: "Informațiile de contact sunt obligatorii."
+        max_length: "Informațiile de contact pot avea maxim {{ limit }} caractere."
 item:
     name:
         not_blank: "Numele articolului este obligatoriu."
@@ -43,7 +46,7 @@ item:
 "Edit": "Editează"
 "No items have been shared yet.": "Niciun articol nu a fost partajat încă."
 "Submitted by you": "Adăugat de tine"
-"Submitted by %email%": "Adăugat de %email%"
+"Submitted by %contact_info%": "Adăugat de %contact_info%"
 "Edit item": "Editează articolul"
 "Photo": "Fotografie"
 "Name": "Nume"

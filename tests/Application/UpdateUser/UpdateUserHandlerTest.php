@@ -11,6 +11,7 @@ use App\Domain\User\Exception\UserNotFoundException;
 use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
+use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
 use App\Service\ValidationService\ValidatorService;
@@ -35,6 +36,7 @@ final class UpdateUserHandlerTest extends TestCase
             $this->userRepository,
             $this->passwordHasher,
             new PasswordValueObject($this->validator),
+            new ContactInfoValueObject($this->validator),
         );
     }
 
@@ -127,6 +129,21 @@ final class UpdateUserHandlerTest extends TestCase
             currentPassword: 'correct-password',
             contactInfo: 'new contact info',
             newPassword: 'short',
+        ));
+    }
+
+    public function testHandleThrowsWhenContactInfoIsBlank(): void
+    {
+        $this->userRepository->method('findByEmail')->willReturn($this->buildUser());
+        $this->passwordHasher->method('verify')->willReturn(true);
+        $this->userRepository->expects($this->never())->method('update');
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->handler->handle(new UpdateUserCommand(
+            email: 'jane.doe@example.com',
+            currentPassword: 'correct-password',
+            contactInfo: '',
         ));
     }
 

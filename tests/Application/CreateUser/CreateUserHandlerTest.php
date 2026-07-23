@@ -11,6 +11,7 @@ use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\UuidInterface;
+use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
 use App\Service\ValidationService\ValidatorService;
@@ -40,6 +41,7 @@ final class CreateUserHandlerTest extends TestCase
             $this->passwordHasher,
             new EmailValueObject($this->validator),
             new PasswordValueObject($this->validator),
+            new ContactInfoValueObject($this->validator),
             $uuid,
         );
     }
@@ -76,7 +78,7 @@ final class CreateUserHandlerTest extends TestCase
         $this->handler->handle(new CreateUserCommand(
             email: 'not-an-email',
             plainPassword: 'a-strong-password',
-            contactInfo: '',
+            contactInfo: '+40 700 000 000',
         ));
     }
 
@@ -89,6 +91,19 @@ final class CreateUserHandlerTest extends TestCase
         $this->handler->handle(new CreateUserCommand(
             email: 'john.doe@example.com',
             plainPassword: 'short',
+            contactInfo: '+40 700 000 000',
+        ));
+    }
+
+    public function testHandleThrowsWhenContactInfoIsBlank(): void
+    {
+        $this->userRepository->expects($this->never())->method('add');
+
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->handler->handle(new CreateUserCommand(
+            email: 'john.doe@example.com',
+            plainPassword: 'a-strong-password',
             contactInfo: '',
         ));
     }
@@ -106,7 +121,7 @@ final class CreateUserHandlerTest extends TestCase
         $this->handler->handle(new CreateUserCommand(
             email: 'john.doe@example.com',
             plainPassword: 'a-strong-password',
-            contactInfo: '',
+            contactInfo: '+40 700 000 000',
         ));
     }
 
