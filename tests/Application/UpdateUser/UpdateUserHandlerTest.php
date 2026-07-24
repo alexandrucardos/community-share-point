@@ -44,14 +44,14 @@ final class UpdateUserHandlerTest extends TestCase
     {
         $existingUser = $this->buildUser();
 
-        $this->userRepository->method('findByEmail')->with('jane.doe@example.com')->willReturn($existingUser);
+        $this->userRepository->method('findByEmailAndGroupId')->with('jane.doe@example.com')->willReturn($existingUser);
         $this->passwordHasher->method('verify')->willReturn(true);
 
         $this->userRepository->expects($this->once())
             ->method('update')
             ->with($this->callback(function (UserEntity $user): bool {
                 self::assertSame('new contact info', $user->getContactInfo());
-                self::assertSame('old-hashed-password', $user->getPassword());
+                self::assertSame('old-hashed-password', $user->getHashedPassword());
 
                 return true;
             }));
@@ -67,14 +67,14 @@ final class UpdateUserHandlerTest extends TestCase
     {
         $existingUser = $this->buildUser();
 
-        $this->userRepository->method('findByEmail')->willReturn($existingUser);
+        $this->userRepository->method('findByEmailAndGroupId')->willReturn($existingUser);
         $this->passwordHasher->method('verify')->willReturn(true);
         $this->passwordHasher->method('hash')->willReturn('new-hashed-password');
 
         $this->userRepository->expects($this->once())
             ->method('update')
             ->with($this->callback(function (UserEntity $user): bool {
-                self::assertSame('new-hashed-password', $user->getPassword());
+                self::assertSame('new-hashed-password', $user->getHashedPassword());
 
                 return true;
             }));
@@ -89,7 +89,7 @@ final class UpdateUserHandlerTest extends TestCase
 
     public function testHandleThrowsWhenUserDoesNotExist(): void
     {
-        $this->userRepository->method('findByEmail')->willReturn(null);
+        $this->userRepository->method('findByEmailAndGroupId')->willReturn(null);
         $this->userRepository->expects($this->never())->method('update');
 
         $this->expectException(UserNotFoundException::class);
@@ -103,7 +103,7 @@ final class UpdateUserHandlerTest extends TestCase
 
     public function testHandleThrowsWhenCurrentPasswordIsIncorrect(): void
     {
-        $this->userRepository->method('findByEmail')->willReturn($this->buildUser());
+        $this->userRepository->method('findByEmailAndGroupId')->willReturn($this->buildUser());
         $this->passwordHasher->method('verify')->willReturn(false);
         $this->userRepository->expects($this->never())->method('update');
 
@@ -118,7 +118,7 @@ final class UpdateUserHandlerTest extends TestCase
 
     public function testHandleThrowsWhenNewPasswordIsTooShort(): void
     {
-        $this->userRepository->method('findByEmail')->willReturn($this->buildUser());
+        $this->userRepository->method('findByEmailAndGroupId')->willReturn($this->buildUser());
         $this->passwordHasher->method('verify')->willReturn(true);
         $this->userRepository->expects($this->never())->method('update');
 
@@ -134,7 +134,7 @@ final class UpdateUserHandlerTest extends TestCase
 
     public function testHandleThrowsWhenContactInfoIsBlank(): void
     {
-        $this->userRepository->method('findByEmail')->willReturn($this->buildUser());
+        $this->userRepository->method('findByEmailAndGroupId')->willReturn($this->buildUser());
         $this->passwordHasher->method('verify')->willReturn(true);
         $this->userRepository->expects($this->never())->method('update');
 
@@ -151,7 +151,7 @@ final class UpdateUserHandlerTest extends TestCase
     {
         $user = new UserEntity('user-id');
         $user->setEmail($this->email('jane.doe@example.com'));
-        $user->setPassword('old-hashed-password');
+        $user->setHashedPassword('old-hashed-password');
         $user->setContactInfo('old contact info');
         $user->setGroupId('');
 

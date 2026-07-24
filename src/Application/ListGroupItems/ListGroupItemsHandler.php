@@ -6,6 +6,7 @@ namespace App\Application\ListGroupItems;
 
 use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
+use App\Domain\Item\ItemStatus;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
 
@@ -26,10 +27,13 @@ final class ListGroupItemsHandler
 
         $contactInfoByUserId = array_combine(
             array_map(static fn (UserEntity $user): string => $user->getId()->value, $groupUsers),
-            array_map(static fn (UserEntity $user): string => $user->getContactInfo(), $groupUsers),
+            array_map(static fn (UserEntity $user): string => $user->getContactInfo()->value, $groupUsers),
         );
 
-        $items = $this->itemRepository->findAllByUserIds(array_keys($contactInfoByUserId));
+        $items = array_filter(
+            $this->itemRepository->findAllByUserIds(array_keys($contactInfoByUserId)),
+            static fn (ItemEntity $item): bool => $item->getStatus() !== ItemStatus::Deleted->value,
+        );
 
         return array_map(
             static fn (ItemEntity $item): ListGroupItemsDto => new ListGroupItemsDto(
@@ -38,8 +42,8 @@ final class ListGroupItemsHandler
                 status: $item->getStatus(),
                 description: $item->getDescription(),
                 imageUrl: $item->getImageUrl(),
-                userId: $item->getUserId(),
-                contactInfo: $contactInfoByUserId[$item->getUserId()] ?? 'Unknown',
+                userId: $item->getUserId()->value,
+                contactInfo: $contactInfoByUserId[$item->getUserId()->value] ?? 'Unknown',
             ),
             $items
         );

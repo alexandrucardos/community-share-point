@@ -44,7 +44,7 @@ final class FileUserRepositoryTest extends TestCase
     {
         $repository = $this->createRepository();
 
-        self::assertNull($repository->findByEmail('missing@example.com'));
+        self::assertNull($repository->findByEmailAndGroupId('missing@example.com'));
     }
 
     public function testAddThenFindByEmailReturnsTheStoredUser(): void
@@ -53,18 +53,18 @@ final class FileUserRepositoryTest extends TestCase
 
         $user = new UserEntity('user-id');
         $user->setEmail($this->email('jane.doe@example.com'));
-        $user->setPassword('hashed-password');
+        $user->setHashedPassword('hashed-password');
         $user->setContactInfo('+40 700 000 000');
         $user->setGroupId('group-id');
 
         $repository->add($user);
 
-        $found = $repository->findByEmail('jane.doe@example.com');
+        $found = $repository->findByEmailAndGroupId('jane.doe@example.com');
 
         self::assertNotNull($found);
         self::assertSame('user-id', $found->getId()->value);
         self::assertSame('jane.doe@example.com', $found->getEmail()->value);
-        self::assertSame('hashed-password', $found->getPassword());
+        self::assertSame('hashed-password', $found->getHashedPassword());
         self::assertSame('+40 700 000 000', $found->getContactInfo());
         self::assertSame('group-id', $found->getGroupId());
     }
@@ -75,14 +75,14 @@ final class FileUserRepositoryTest extends TestCase
 
         $secondInstance = $this->createRepository();
 
-        self::assertNotNull($secondInstance->findByEmail('persisted@example.com'));
+        self::assertNotNull($secondInstance->findByEmailAndGroupId('persisted@example.com'));
     }
 
     private function buildUser(string $email): UserEntity
     {
         $user = new UserEntity('id');
         $user->setEmail($this->email($email));
-        $user->setPassword('hashed');
+        $user->setHashedPassword('hashed');
         $user->setContactInfo('');
         $user->setGroupId('');
 

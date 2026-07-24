@@ -27,7 +27,7 @@ final class UpdateItemHandler
             throw new ItemNotFoundException($command->itemId);
         }
 
-        if ($item->getUserId() !== $command->userId) {
+        if ($item->getUserId()->value !== $command->userId) {
             throw new ItemAccessDeniedException();
         }
 

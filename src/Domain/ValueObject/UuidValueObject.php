@@ -8,7 +8,7 @@ use App\Domain\DTO\ConstraintDto;
 
 final class UuidValueObject
 {
-    public readonly mixed $value;
+    public mixed $value;
 
     public function __construct(
         private readonly ValidatorInterface $validator

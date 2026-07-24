@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\ItemRepository;
+namespace App\Repository\Adaptor;
 
 use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
+use App\Domain\ValueObject\UuidValueObject;
 use Symfony\Component\Asset\Packages;
 
 final class FileItemRepository implements ItemRepositoryInterface
@@ -18,6 +19,7 @@ final class FileItemRepository implements ItemRepositoryInterface
     public function __construct(
         string $projectDir,
         private readonly Packages $assetPackages,
+        private readonly UuidValueObject $uuidValueObject,
     ) {
         $this->storagePath = $projectDir.'/var/data/items.json';
     }
@@ -65,7 +67,7 @@ final class FileItemRepository implements ItemRepositoryInterface
 
         $records[$item->getId()] = [
             'id' => $item->getId(),
-            'userId' => $item->getUserId(),
+            'userId' => $item->getUserId()->value,
             'name' => $item->getName(),
             'description' => $item->getDescription(),
             'status' => $item->getStatus(),
@@ -78,7 +80,8 @@ final class FileItemRepository implements ItemRepositoryInterface
     private function mapRecordToItem(array $record): ItemEntity
     {
         $item = new ItemEntity($record['id']);
-        $item->setUserId($record['userId'] ?? $record['ownerId'] ?? '');
+
+        $item->setUserId(($this->uuidValueObject)($record['userId']));
         $item->setName($record['name']);
         $item->setDescription($record['description']);
         $item->setStatus($record['status']);

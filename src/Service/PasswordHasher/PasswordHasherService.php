@@ -6,7 +6,7 @@ namespace App\Service\PasswordHasher;
 
 use App\Domain\User\PasswordHasherInterface;
 use App\Domain\ValueObject\PasswordValueObject;
-use App\Infrastructure\Security\SecurityUser;
+use App\Service\Security\SecurityUser;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
 final class PasswordHasherService implements PasswordHasherInterface

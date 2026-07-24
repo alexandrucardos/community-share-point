@@ -9,44 +9,46 @@ use App\Domain\User\Exception\UserNotFoundException;
 use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\ValueObject\ContactInfoValueObject;
+use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
+use App\Domain\ValueObject\UuidValueObject;
+use App\Domain\ValueObject\ValidatorInterface;
 
 final class UpdateUserHandler
 {
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
         private readonly PasswordHasherInterface $passwordHasher,
-        private readonly PasswordValueObject $passwordValidator,
-        private readonly ContactInfoValueObject $contactInfoValidator,
+        private readonly ValidatorInterface $validator,
     ) {
     }
 
     public function handle(UpdateUserCommand $command): void
     {
-        $user = $this->userRepository->findByEmail($command->email);
+        $emailVO = (new EmailValueObject($this->validator))($command->email);
+        $groupIdVO = (new UuidValueObject($this->validator))($command->groupId);
+
+        $user = $this->userRepository->findByEmailAndGroupId(
+            $emailVO,
+            $groupIdVO
+        );
 
         if ($user === null) {
             throw new UserNotFoundException($command->email);
         }
 
-        if (!$this->passwordHasher->verify($user->getPassword(), $command->currentPassword)) {
+        if (!$this->passwordHasher->verify($user->getHashedPassword(), $command->currentPassword)) {
             throw new InvalidCurrentPasswordException();
         }
 
         if ($command->newPassword !== null) {
-            $passwordVO = ($this->passwordValidator)($command->newPassword);
+            $passwordVO = (new PasswordValueObject($this->validator))($command->newPassword);
 
-            $user->setPassword($this->passwordHasher->hash($passwordVO));
+            $user->setHashedPassword($this->passwordHasher->hash($passwordVO));
         }
 
-        $contactInfoVO = ($this->contactInfoValidator)($command->contactInfo);
-        $user->setContactInfo($contactInfoVO->value);
-
-        if ($command->avatarFilename !== null) {
-            $user->setAvatarFilename($command->avatarFilename);
-        } elseif ($command->removeAvatar) {
-            $user->setAvatarFilename('');
-        }
+        $contactInfoVO = (new ContactInfoValueObject($this->validator))($command->contactInfo);
+        $user->setContactInfo($contactInfoVO);
 
         $this->userRepository->update($user);
     }

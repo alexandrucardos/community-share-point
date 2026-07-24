@@ -37,4 +37,14 @@ final class ContactInfoValueObject
 
         return $this;
     }
+
+    public function __serialize(): array
+    {
+        return ['value' => $this->value];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->value = $data['value'];
+    }
 }

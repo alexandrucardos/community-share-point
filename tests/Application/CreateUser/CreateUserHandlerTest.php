@@ -48,7 +48,7 @@ final class CreateUserHandlerTest extends TestCase
 
     public function testHandleAddsUserWithHashedPasswordWhenDataIsValid(): void
     {
-        $this->userRepository->method('findByEmail')->willReturn(null);
+        $this->userRepository->method('findByEmailAndGroupId')->willReturn(null);
         $this->passwordHasher->method('hash')->willReturn('hashed-password');
 
         $this->userRepository->expects($this->once())
@@ -56,7 +56,7 @@ final class CreateUserHandlerTest extends TestCase
             ->with($this->callback(function (UserEntity $user): bool {
                 self::assertSame('john.doe@example.com', $user->getEmail()->value);
                 self::assertSame('+40 700 000 000', $user->getContactInfo());
-                self::assertSame('hashed-password', $user->getPassword());
+                self::assertSame('hashed-password', $user->getHashedPassword());
                 self::assertNotSame('', $user->getId()->value);
 
                 return true;
@@ -113,7 +113,7 @@ final class CreateUserHandlerTest extends TestCase
         $existingUser = new UserEntity('existing-id');
         $existingUser->setEmail($this->email('john.doe@example.com'));
 
-        $this->userRepository->method('findByEmail')->willReturn($existingUser);
+        $this->userRepository->method('findByEmailAndGroupId')->willReturn($existingUser);
         $this->userRepository->expects($this->never())->method('add');
 
         $this->expectException(EmailAlreadyRegisteredException::class);

@@ -19,20 +19,6 @@
             {% endif %}
 
             <form method="post" action="{{ path('account_edit') }}" class="auth-form" enctype="multipart/form-data">
-                {% if avatarFilename %}
-                    <img class="account-avatar" src="{{ asset('images/avatars/' ~ avatarFilename) }}" alt="{{ 'Profile picture'|trans }}">
-                {% endif %}
-
-                <label for="avatar">{{ 'Profile picture'|trans }}</label>
-                <input type="file" id="avatar" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp">
-
-                {% if avatarFilename %}
-                    <label class="auth-checkbox">
-                        <input type="checkbox" name="remove_avatar" value="1">
-                        {{ 'Remove profile picture'|trans }}
-                    </label>
-                {% endif %}
-
                 <label for="contactInfo">{{ 'Contact info'|trans }}</label>
                 <input type="text" id="contactInfo" name="contactInfo" value="{{ contactInfo }}" placeholder="{{ 'Phone number or address'|trans }}" required>
 

@@ -1,12 +1,12 @@
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
-        App\Infrastructure\Security\SecurityUser: 'auto'
+        App\Service\Security\SecurityUser: 'auto'
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         app_user_provider:
-            id: App\Infrastructure\Security\AppUserProvider
+            id: App\Service\Security\AppUserProvider
 
     firewalls:
         dev:
@@ -44,7 +44,7 @@ when@test:
         password_hashers:
             # Password hashers are resource-intensive by design to ensure security.
             # In tests, it's safe to reduce their cost to improve performance.
-            App\Infrastructure\Security\SecurityUser:
+            App\Service\Security\SecurityUser:
                 algorithm: auto
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon

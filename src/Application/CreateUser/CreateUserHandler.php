@@ -13,15 +13,16 @@ use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
 use App\Domain\ValueObject\UuidValueObject;
+use App\Service\Security\AppUserProvider;
 
 final class CreateUserHandler
 {
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
         private readonly PasswordHasherInterface $passwordHasher,
-        private readonly EmailValueObject $emailValidator,
-        private readonly PasswordValueObject $passwordValidator,
-        private readonly ContactInfoValueObject $contactInfoValidator,
+        private readonly EmailValueObject $emailValueObject,
+        private readonly PasswordValueObject $passwordValueObject,
+        private readonly ContactInfoValueObject $contactInfoValueObject,
         private readonly UuidValueObject $uuidValueObject,
         private readonly UuidInterface $uuid,
     ) {
@@ -29,20 +30,24 @@ final class CreateUserHandler
 
     public function handle(CreateUserCommand $command): void
     {
-        $passwordVO = ($this->passwordValidator)($command->plainPassword);
-        $contactInfoVO = ($this->contactInfoValidator)($command->contactInfo);
+        $emailVO = ($this->emailValueObject)($command->email);
+        $passwordVO = ($this->passwordValueObject)($command->plainPassword);
+        $groupIdVO = ($this->uuidValueObject)(AppUserProvider::DEFAULT_GROUP_ID);
 
-        if ($this->userRepository->findByEmail($command->email) !== null) {
+        $existingUser = $this->userRepository->findByEmailAndGroupId(
+            $emailVO,
+            $groupIdVO
+        );
+
+        if ($existingUser !== null) {
             throw new EmailAlreadyRegisteredException($command->email);
         }
 
         $user = new UserEntity(($this->uuidValueObject)($this->uuid->generate()));
-        $user->setEmail(($this->emailValidator)($command->email));
-        $user->setContactInfo($contactInfoVO->value);
-        //todo add a vo for hasher
-        $user->setPassword($this->passwordHasher->hash($passwordVO));
-        //todo add a group_id
-        $user->setGroupId('aaa');
+        $user->setEmail($emailVO);
+        $user->setContactInfo(($this->contactInfoValueObject)($command->contactInfo));
+        $user->setHashedPassword($this->passwordHasher->hash($passwordVO));
+        $user->setGroupId($groupIdVO);
 
         $this->userRepository->add($user);
     }

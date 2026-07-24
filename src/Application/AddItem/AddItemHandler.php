@@ -9,6 +9,7 @@ use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\UuidInterface;
 use App\Domain\ValueObject\ItemDescriptionValueObject;
 use App\Domain\ValueObject\ItemNameValueObject;
+use App\Domain\ValueObject\UuidValueObject;
 
 final class AddItemHandler
 {
@@ -17,6 +18,7 @@ final class AddItemHandler
         private readonly ItemNameValueObject $nameValidator,
         private readonly ItemDescriptionValueObject $descriptionValidator,
         private readonly UuidInterface $uuid,
+        private readonly UuidValueObject $uuidValueObject,
     ) {
     }
 
@@ -26,7 +28,7 @@ final class AddItemHandler
         ($this->descriptionValidator)($command->description);
 
         $item = new ItemEntity($this->uuid->generate());
-        $item->setUserId($command->userId);
+        $item->setUserId(($this->uuidValueObject)($command->userId));
         $item->setName($command->name);
         $item->setDescription($command->description);
         $item->setStatus($command->status->value);

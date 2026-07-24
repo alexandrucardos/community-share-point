@@ -7,7 +7,6 @@ namespace App\Domain\Item;
 enum ItemStatus: string
 {
     case Available = 'Available';
-    case InUse = 'In Use';
-    case NeedsRepair = 'Needs Repair';
+    case Deleted = 'Deleted';
     case Reserved = 'Reserved';
 }

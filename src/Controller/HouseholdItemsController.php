@@ -17,8 +17,8 @@ use App\Domain\Item\Exception\ItemNotFoundException;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\Item\ItemStatus;
 use App\Domain\User\UserEntity;
-use App\Infrastructure\Security\SecurityUser;
 use App\Service\Image\ImageUploader;
+use App\Service\Security\SecurityUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,7 +40,7 @@ final class HouseholdItemsController extends AbstractController
     public function group(ListGroupItemsHandler $listGroupItemsHandler): Response
     {
         return $this->render('household_items/group.html.twig', [
-            'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($this->currentUser()->getGroupId())),
+            'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($this->currentUser()->getGroupId()->value)),
             'currentUserId' => $this->currentUser()->getId()->value,
         ]);
     }
@@ -104,7 +104,7 @@ final class HouseholdItemsController extends AbstractController
     {
         $item = $itemRepository->findById($id);
 
-        if ($item === null || $item->getUserId() !== $this->currentUser()->getId()->value) {
+        if ($item === null || $item->getUserId()->value !== $this->currentUser()->getId()->value) {
             throw $this->createNotFoundException('Item not found.');
         }
 

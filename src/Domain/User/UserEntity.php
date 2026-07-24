@@ -2,16 +2,16 @@
 
 namespace App\Domain\User;
 
+use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 
 final class UserEntity
 {
-    private string $contactInfo;
-    private string $groupId;
+    private ContactInfoValueObject $contactInfo;
+    private UuidValueObject $groupId;
     private EmailValueObject $email;
-    private string $password;
-    private string $avatarFilename = '';
+    private string $hashedPassword;
 
     public function __construct(
         private readonly UuidValueObject $id,
@@ -24,22 +24,22 @@ final class UserEntity
         return $this->id;
     }
 
-    public function getContactInfo(): string
+    public function getContactInfo(): ContactInfoValueObject
     {
         return $this->contactInfo;
     }
 
-    public function setContactInfo(string $contactInfo): void
+    public function setContactInfo(ContactInfoValueObject $contactInfo): void
     {
         $this->contactInfo = $contactInfo;
     }
 
-    public function getGroupId(): string
+    public function getGroupId(): UuidValueObject
     {
         return $this->groupId;
     }
 
-    public function setGroupId(string $groupId): void
+    public function setGroupId(UuidValueObject $groupId): void
     {
         $this->groupId = $groupId;
     }
@@ -54,23 +54,13 @@ final class UserEntity
         $this->email = $email;
     }
 
-    public function getPassword(): string
+    public function getHashedPassword(): string
     {
-        return $this->password;
+        return $this->hashedPassword;
     }
 
-    public function setPassword(string $password): void
+    public function setHashedPassword(string $hashedPassword): void
     {
-        $this->password = $password;
-    }
-
-    public function getAvatarFilename(): string
-    {
-        return $this->avatarFilename;
-    }
-
-    public function setAvatarFilename(string $avatarFilename): void
-    {
-        $this->avatarFilename = $avatarFilename;
+        $this->hashedPassword = $hashedPassword;
     }
 }

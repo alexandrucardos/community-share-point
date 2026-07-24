@@ -2,6 +2,8 @@
 
 namespace App\Domain\Item;
 
+use App\Domain\ValueObject\UuidValueObject;
+
 final class ItemEntity
 {
     private string $name;
@@ -9,7 +11,7 @@ final class ItemEntity
     private string $status;
     private string $imageUrl;
     private string $imageFilename = '';
-    private string $userId;
+    private UuidValueObject $userId;
 
     public function __construct(
         private string $id,
@@ -20,12 +22,12 @@ final class ItemEntity
         return $this->id;
     }
 
-    public function getUserId(): string
+    public function getUserId(): UuidValueObject
     {
         return $this->userId;
     }
 
-    public function setUserId(string $userId): void
+    public function setUserId(UuidValueObject $userId): void
     {
         $this->userId = $userId;
     }

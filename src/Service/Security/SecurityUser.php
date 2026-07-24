@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Security;
+namespace App\Service\Security;
 
 use App\Domain\User\UserEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -27,7 +27,7 @@ final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInte
 
     public function getPassword(): string
     {
-        return $this->user->getPassword();
+        return $this->user->getHashedPassword();
     }
 
     public function eraseCredentials(): void

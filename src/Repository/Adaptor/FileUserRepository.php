@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\UserRepository;
+namespace App\Repository\Adaptor;
 
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
+use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 use App\Domain\ValueObject\ValidatorInterface;
@@ -31,9 +32,12 @@ final class FileUserRepository implements UserRepositoryInterface
         $this->persist($user);
     }
 
-    public function findByEmail(string $email): ?UserEntity
+    public function findByEmailAndGroupId(
+        EmailValueObject $email,
+        UuidValueObject $groupId,
+    ): ?UserEntity
     {
-        $record = $this->readRecords()[$email] ?? null;
+        $record = $this->readRecords()[$email->value] ?? null;
 
         return $record === null ? null : $this->mapRecordToUser($record);
     }
@@ -67,10 +71,9 @@ final class FileUserRepository implements UserRepositoryInterface
         $user->setEmail(
             (new EmailValueObject($this->validator))($record['email'])
         );
-        $user->setPassword($record['password']);
-        $user->setContactInfo($record['contactInfo'] ?? '');
-        $user->setGroupId($record['groupId'] ?? '');
-        $user->setAvatarFilename($record['avatarFilename'] ?? '');
+        $user->setHashedPassword($record['password']);
+        $user->setContactInfo((new ContactInfoValueObject($this->validator))($record['contactInfo']));
+        $user->setGroupId((new UuidValueObject($this->validator))($record['groupId']));
 
         return $user;
     }
@@ -82,10 +85,9 @@ final class FileUserRepository implements UserRepositoryInterface
         $records[$user->getEmail()->value] = [
             'id' => $user->getId()->value,
             'email' => $user->getEmail()->value,
-            'password' => $user->getPassword(),
-            'contactInfo' => $user->getContactInfo(),
-            'groupId' => $user->getGroupId(),
-            'avatarFilename' => $user->getAvatarFilename(),
+            'password' => $user->getHashedPassword(),
+            'contactInfo' => $user->getContactInfo()->value,
+            'groupId' => $user->getGroupId()->value,
         ];
 
         $this->writeRecords($records);
