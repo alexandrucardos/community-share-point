@@ -25,3 +25,6 @@
   - validation
   - auth
   - ux
+
+# Important
+- do not touch folder src/Domain or src/Application unless stated by user, if any changes need to be done there, stop the agent execution
