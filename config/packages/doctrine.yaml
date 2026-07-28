@@ -1,0 +1,14 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        profiling_collect_backtrace: '%kernel.debug%'
+        use_savepoints: true
+    # No ORM: the domain layer stays persistence-agnostic and the repository
+    # adaptors in src/Repository map rows to entities by hand. Doctrine is used
+    # only for the DBAL connection and for schema migrations.
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'

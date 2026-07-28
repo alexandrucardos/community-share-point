@@ -7,21 +7,20 @@ namespace App\Repository\Adaptor;
 use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\ValueObject\UuidValueObject;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Connection;
 use Symfony\Component\Asset\Packages;
 
-final class FileItemRepository implements ItemRepositoryInterface
+final class SqliteItemRepository implements ItemRepositoryInterface
 {
     private const COLOR_PALETTE = ['2563eb', 'db2777', 'ea580c', '65a30d', '7c3aed', '0891b2'];
     private const IMAGE_SUBDIRECTORY = 'images/items';
 
-    private readonly string $storagePath;
-
     public function __construct(
-        string $projectDir,
+        private readonly Connection $connection,
         private readonly Packages $assetPackages,
         private readonly UuidValueObject $uuidValueObject,
     ) {
-        $this->storagePath = $projectDir.'/var/data/items.json';
     }
 
     public function add(ItemEntity $item): void
@@ -36,57 +35,73 @@ final class FileItemRepository implements ItemRepositoryInterface
 
     public function findById(string $id): ?ItemEntity
     {
-        $record = $this->readRecords()[$id] ?? null;
+        $record = $this->connection->fetchAssociative(
+            'SELECT * FROM items WHERE id = ?',
+            [$id],
+        );
 
-        return $record === null ? null : $this->mapRecordToItem($record);
+        return $record === false ? null : $this->mapRecordToItem($record);
     }
 
     public function findAllByUserId(string $userId): array
     {
-        $records = array_filter(
-            $this->readRecords(),
-            static fn (array $record): bool => ($record['userId'] ?? $record['ownerId'] ?? '') === $userId,
+        $records = $this->connection->fetchAllAssociative(
+            'SELECT * FROM items WHERE user_id = ?',
+            [$userId],
         );
 
-        return array_map($this->mapRecordToItem(...), array_values($records));
+        return array_map($this->mapRecordToItem(...), $records);
     }
 
     public function findAllByUserIds(array $userIds): array
     {
-        $records = array_filter(
-            $this->readRecords(),
-            static fn (array $record): bool => in_array($record['userId'] ?? $record['ownerId'] ?? '', $userIds, true),
+        if ($userIds === []) {
+            return [];
+        }
+
+        $records = $this->connection->fetchAllAssociative(
+            'SELECT * FROM items WHERE user_id IN (?)',
+            [array_values($userIds)],
+            [ArrayParameterType::STRING],
         );
 
-        return array_map($this->mapRecordToItem(...), array_values($records));
+        return array_map($this->mapRecordToItem(...), $records);
     }
 
     private function persist(ItemEntity $item): void
     {
-        $records = $this->readRecords();
-
-        $records[$item->getId()] = [
-            'id' => $item->getId(),
-            'userId' => $item->getUserId()->value,
-            'name' => $item->getName(),
-            'description' => $item->getDescription(),
-            'status' => $item->getStatus(),
-            'imageFilename' => $item->getImageFilename(),
-        ];
-
-        $this->writeRecords($records);
+        $this->connection->executeStatement(
+            <<<'SQL'
+                INSERT INTO items (id, user_id, name, description, status, image_filename)
+                VALUES (:id, :userId, :name, :description, :status, :imageFilename)
+                ON CONFLICT(id) DO UPDATE SET
+                    user_id        = excluded.user_id,
+                    name           = excluded.name,
+                    description    = excluded.description,
+                    status         = excluded.status,
+                    image_filename = excluded.image_filename
+                SQL,
+            [
+                'id' => $item->getId(),
+                'userId' => $item->getUserId()->value,
+                'name' => $item->getName(),
+                'description' => $item->getDescription(),
+                'status' => $item->getStatus(),
+                'imageFilename' => $item->getImageFilename(),
+            ],
+        );
     }
 
     private function mapRecordToItem(array $record): ItemEntity
     {
         $item = new ItemEntity($record['id']);
 
-        $item->setUserId(($this->uuidValueObject)($record['userId']));
+        $item->setUserId(($this->uuidValueObject)($record['user_id']));
         $item->setName($record['name']);
         $item->setDescription($record['description']);
         $item->setStatus($record['status']);
 
-        $imageFilename = $record['imageFilename'] ?? '';
+        $imageFilename = $record['image_filename'] ?? '';
         $item->setImageFilename($imageFilename);
         $item->setImageUrl(
             $imageFilename !== ''
@@ -111,29 +126,5 @@ final class FileItemRepository implements ItemRepositoryInterface
             SVG;
 
         return 'data:image/svg+xml;base64,'.base64_encode($svg);
-    }
-
-    private function readRecords(): array
-    {
-        if (!is_file($this->storagePath)) {
-            return [];
-        }
-
-        $contents = file_get_contents($this->storagePath);
-
-        return $contents === false || $contents === '' ? [] : json_decode($contents, true, flags: \JSON_THROW_ON_ERROR);
-    }
-
-    private function writeRecords(array $records): void
-    {
-        if (!is_dir(\dirname($this->storagePath))) {
-            mkdir(\dirname($this->storagePath), recursive: true);
-        }
-
-        file_put_contents(
-            $this->storagePath,
-            json_encode($records, \JSON_THROW_ON_ERROR | \JSON_PRETTY_PRINT),
-            \LOCK_EX
-        );
     }
 }
