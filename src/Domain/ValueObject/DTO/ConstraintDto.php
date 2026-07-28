@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\DTO;
+namespace App\Domain\ValueObject\DTO;
 
 use App\Domain\ValueObject\Constraint;
 

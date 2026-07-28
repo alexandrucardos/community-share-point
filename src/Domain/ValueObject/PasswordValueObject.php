@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Domain\ValueObject;
 
-use App\Domain\DTO\ConstraintDto;
+use App\Domain\ValueObject\DTO\ConstraintDto;
 
 final class PasswordValueObject
 {
