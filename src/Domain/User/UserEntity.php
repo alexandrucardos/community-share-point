@@ -13,8 +13,7 @@ final class UserEntity
     private EmailValueObject $email;
     private string $hashedPassword;
 
-    public function
-    __construct(
+    public function __construct(
         private readonly UuidValueObject $id,
     )
     {
