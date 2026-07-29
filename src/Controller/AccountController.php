@@ -16,8 +16,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class AccountController extends AbstractController
 {
-    #[Route('/account', name: 'account_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, UpdateUserHandler $updateUserHandler): Response
+    #[Route('/group/{uuid}/account', name: 'account_edit', requirements: ['uuid' => GroupRoute::UUID], methods: ['GET', 'POST'])]
+    public function edit(string $uuid, Request $request, UpdateUserHandler $updateUserHandler): Response
     {
         $securityUser = $this->getUser();
 
@@ -26,6 +26,10 @@ final class AccountController extends AbstractController
         }
 
         $currentUser = $securityUser->getLoadUserDto();
+
+        if (strcasecmp($uuid, $currentUser->groupId) !== 0) {
+            throw $this->createAccessDeniedException();
+        }
         $errors = [];
         $contactInfo = $currentUser->contactInfo;
 
@@ -45,8 +49,7 @@ final class AccountController extends AbstractController
                         email: (string) $currentUser->email,
                         currentPassword: $currentPassword,
                         contactInfo: $contactInfo,
-                        //todo this should always have a group id
-                        groupId: (string) $request->request->get('groupId', ''),
+                        groupId: (string) $currentUser->groupId,
                         newPassword: $newPassword !== '' ? $newPassword : null,
                     ));
 

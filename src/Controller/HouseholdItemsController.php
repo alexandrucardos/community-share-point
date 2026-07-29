@@ -25,21 +25,26 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/group/{uuid}', requirements: ['uuid' => GroupRoute::UUID])]
 final class HouseholdItemsController extends AbstractController
 {
     private const IMAGE_SUBDIRECTORY = 'images/items';
 
     #[Route('/items', name: 'household_items_index', methods: ['GET'])]
-    public function index(ListUserItemsHandler $listUserItemsHandler): Response
+    public function index(string $uuid, ListUserItemsHandler $listUserItemsHandler): Response
     {
+        $this->assertGroup($uuid);
+
         return $this->render('household_items/index.html.twig', [
             'items' => $listUserItemsHandler->handle(new ListUserItemsQuery($this->currentUser()->id)),
         ]);
     }
 
     #[Route('/items/group', name: 'household_items_group', methods: ['GET'])]
-    public function group(ListGroupItemsHandler $listGroupItemsHandler): Response
+    public function group(string $uuid, ListGroupItemsHandler $listGroupItemsHandler): Response
     {
+        $this->assertGroup($uuid);
+
         return $this->render('household_items/group.html.twig', [
             'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($this->currentUser()->groupId)),
             'currentUserId' => $this->currentUser()->id,
@@ -47,8 +52,10 @@ final class HouseholdItemsController extends AbstractController
     }
 
     #[Route('/items/new', name: 'household_items_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, AddItemHandler $addItemHandler, ImageUploader $imageUploader): Response
+    public function new(string $uuid, Request $request, AddItemHandler $addItemHandler, ImageUploader $imageUploader): Response
     {
+        $this->assertGroup($uuid);
+
         $errors = [];
         $name = '';
         $description = '';
@@ -101,8 +108,10 @@ final class HouseholdItemsController extends AbstractController
     }
 
     #[Route('/items/{id}/edit', name: 'household_items_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, string $id, ItemRepositoryInterface $itemRepository, UpdateItemHandler $updateItemHandler, ImageUploader $imageUploader): Response
+    public function edit(string $uuid, Request $request, string $id, ItemRepositoryInterface $itemRepository, UpdateItemHandler $updateItemHandler, ImageUploader $imageUploader): Response
     {
+        $this->assertGroup($uuid);
+
         $item = $itemRepository->findById($id);
 
         if ($item === null || $item->getUserId()->value !== $this->currentUser()->id) {
@@ -170,5 +179,15 @@ final class HouseholdItemsController extends AbstractController
         }
 
         return $securityUser->getLoadUserDto();
+    }
+
+    /**
+     * The group in the URL must match the authenticated user's own group.
+     */
+    private function assertGroup(string $uuid): void
+    {
+        if (strcasecmp($uuid, $this->currentUser()->groupId) !== 0) {
+            throw $this->createAccessDeniedException();
+        }
     }
 }

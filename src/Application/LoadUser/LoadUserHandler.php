@@ -16,9 +16,9 @@ final class LoadUserHandler
     ) {
     }
 
-    public function query(LoadUserQuery $loadUserDto): ?LoadUserDto
+    public function query(LoadUserQuery $loadUserQuery): ?LoadUserDto
     {
-        return $this->userRepository->findById(($this->uuidValueObject)($loadUserDto->userId));
+        return $this->userRepository->findById(($this->uuidValueObject)($loadUserQuery->userId));
 
     }
 }

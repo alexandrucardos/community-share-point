@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Constraints\EmailValidator;
 use Symfony\Component\Validator\ConstraintValidatorFactory;
 use Symfony\Component\Validator\Validation;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Domain\ValueObject\DTO\ConstraintDto;
 
 final class ValidatorService implements ValidatorInterface
 {
@@ -15,11 +16,11 @@ final class ValidatorService implements ValidatorInterface
     {
 
     }
+    /**
+     * @param $constraintsDto ConstraintDto[]
+     */
     public function validate(
         mixed $value,
-        /**
-         * $constraints ConstraintDto[]
-         */
         array $constraintsDto
     ):void
     {

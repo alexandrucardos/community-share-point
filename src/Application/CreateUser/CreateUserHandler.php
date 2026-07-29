@@ -13,26 +13,23 @@ use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\PasswordValueObject;
 use App\Domain\ValueObject\UuidValueObject;
-use App\Service\Security\AppUserProvider;
+use App\Domain\ValueObject\ValidatorInterface;
 
 final class CreateUserHandler
 {
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
         private readonly PasswordHasherInterface $passwordHasher,
-        private readonly EmailValueObject $emailValueObject,
-        private readonly PasswordValueObject $passwordValueObject,
-        private readonly ContactInfoValueObject $contactInfoValueObject,
-        private readonly UuidValueObject $uuidValueObject,
+        private readonly ValidatorInterface $validator,
         private readonly UuidInterface $uuid,
     ) {
     }
 
     public function handle(CreateUserCommand $command): void
     {
-        $emailVO = ($this->emailValueObject)($command->email);
-        $passwordVO = ($this->passwordValueObject)($command->plainPassword);
-        $groupIdVO = ($this->uuidValueObject)(AppUserProvider::DEFAULT_GROUP_ID);
+        $emailVO = (new EmailValueObject($this->validator))($command->email);
+        $passwordVO = (new PasswordValueObject($this->validator))($command->plainPassword);
+        $groupIdVO = (new UuidValueObject($this->validator))($command->groupId);
 
         $existingUser = $this->userRepository->findByEmailAndGroupId(
             $emailVO,
@@ -43,9 +40,9 @@ final class CreateUserHandler
             throw new EmailAndGroupAlreadyRegisteredException($command->email);
         }
 
-        $user = new UserEntity(($this->uuidValueObject)($this->uuid->generate()));
+        $user = new UserEntity((new UuidValueObject($this->validator))($this->uuid->generate()));
         $user->setEmail($emailVO);
-        $user->setContactInfo(($this->contactInfoValueObject)($command->contactInfo));
+        $user->setContactInfo((new ContactInfoValueObject($this->validator))($command->contactInfo));
         $user->setHashedPassword($this->passwordHasher->hash($passwordVO));
         $user->setGroupId($groupIdVO);
 

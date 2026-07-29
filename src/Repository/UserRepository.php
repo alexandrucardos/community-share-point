@@ -48,6 +48,11 @@ final class UserRepository extends ServiceEntityRepository
         return $this->findOneBy(['email' => $email]);
     }
 
+    public function findByEmailAndGroupId(string $email, string $groupId): ?User
+    {
+        return $this->findOneBy(['email' => $email, 'groupId' => $groupId]);
+    }
+
     /**
      * @return User[]
      */

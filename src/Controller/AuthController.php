@@ -15,7 +15,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class AuthController extends AbstractController
 {
-    #[Route('/login', name: 'app_login', methods: ['GET', 'POST'])]
+    #[Route('/group/{uuid}/login', name: 'app_login', requirements: ['uuid' => GroupRoute::UUID], methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser() !== null) {
@@ -34,10 +34,11 @@ final class AuthController extends AbstractController
         throw new \LogicException('This method is intercepted by the logout key on the firewall.');
     }
 
-    #[Route('/register', name: 'app_register', methods: ['GET', 'POST'])]
-    public function register(Request $request, CreateUserHandler $createUserHandler): Response
+    #[Route('/group/{uuid}/register', name: 'app_register', requirements: ['uuid' => GroupRoute::UUID], methods: ['GET', 'POST'])]
+    public function register(string $uuid, Request $request, CreateUserHandler $createUserHandler): Response
     {
         $errors = [];
+        $groupId = $uuid;
 
         if ($request->isMethod('POST')) {
             $email = (string) $request->request->get('email', '');
@@ -55,6 +56,7 @@ final class AuthController extends AbstractController
                         email: $email,
                         plainPassword: $password,
                         contactInfo: $contactInfo,
+                        groupId: $groupId,
                     ));
 
                     $this->addFlash('success', 'Your account has been created, you can now log in.');

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Application\ListUserItems;
 
-use App\Domain\Item\ItemEntity;
 use App\Application\Repository\ItemQueryRepositoryInterface;
 
 final class ListUserItemsHandler
@@ -19,15 +18,6 @@ final class ListUserItemsHandler
      */
     public function handle(ListUserItemsQuery $query): array
     {
-        return array_map(
-            static fn (ItemEntity $item): ListUserItemsDto => new ListUserItemsDto(
-                id: $item->getId(),
-                name: $item->getName(),
-                status: $item->getStatus(),
-                description: $item->getDescription(),
-                imageUrl: $item->getImageUrl(),
-            ),
-            $this->itemRepository->findAllByUserId($query->userId)
-        );
+        return $this->itemRepository->findAllByUserId($query->userId);
     }
 }

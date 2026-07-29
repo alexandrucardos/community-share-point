@@ -17,16 +17,14 @@ security:
             lazy: true
             provider: app_user_provider
 
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                enable_csrf: true
-                default_target_path: household_items_index
-                always_use_default_target_path: true
+            custom_authenticator: App\Service\Security\LoginFormAuthenticator
 
+            entry_point: App\Service\Security\LoginFormAuthenticator
+
+            # No target: App\Service\Security\LogoutRedirectSubscriber redirects
+            # to /group/{uuid}/login using the logged-out user's group.
             logout:
                 path: app_logout
-                target: app_login
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
@@ -34,10 +32,10 @@ security:
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/$, roles: PUBLIC_ACCESS }
-        - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/account, roles: ROLE_USER }
-        - { path: ^/items, roles: ROLE_USER }
+        - { path: ^/group/[^/]+/register, roles: PUBLIC_ACCESS }
+        - { path: ^/group/[^/]+/login, roles: PUBLIC_ACCESS }
+        - { path: ^/group/[^/]+/account, roles: ROLE_USER }
+        - { path: ^/group/[^/]+/items, roles: ROLE_USER }
 
 when@test:
     security:

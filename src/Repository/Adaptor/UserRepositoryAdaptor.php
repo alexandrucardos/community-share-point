@@ -36,8 +36,7 @@ final class UserRepositoryAdaptor implements UserRepositoryInterface
         UuidValueObject $groupId
     ): ?UserEntity
     {
-        //todo add group id to the query
-        $record = $this->records->findByEmail($email->value);
+        $record = $this->records->findByEmailAndGroupId($email->value, $groupId->value);
 
         return $record === null ? null : $this->toDomain($record);
     }
