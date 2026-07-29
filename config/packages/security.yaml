@@ -35,6 +35,7 @@ security:
         - { path: ^/group/[^/]+/register, roles: PUBLIC_ACCESS }
         - { path: ^/group/[^/]+/login, roles: PUBLIC_ACCESS }
         - { path: ^/group/[^/]+/account, roles: ROLE_USER }
+        - { path: ^/group/[^/]+/items/group, roles: PUBLIC_ACCESS }
         - { path: ^/group/[^/]+/items, roles: ROLE_USER }
 
 when@test:
