@@ -16,12 +16,5 @@ interface UserRepositoryInterface
     public function findByEmailAndGroupId(
         EmailValueObject $email,
         UuidValueObject $groupId
-    ): ?UserEntity;
-
-    public function findById(string $id): ?UserEntity;
-
-    /**
-     * @return UserEntity[]
-     */
-    public function findAllByGroupId(string $groupId): array;
+    );
 }

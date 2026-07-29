@@ -25,9 +25,9 @@ final class AccountController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $currentUser = $securityUser->getUser();
+        $currentUser = $securityUser->getLoadUserDto();
         $errors = [];
-        $contactInfo = $currentUser->getContactInfo();
+        $contactInfo = $currentUser->contactInfo;
 
         if ($request->isMethod('POST')) {
             $contactInfo = (string) $request->request->get('contactInfo', '');
@@ -42,7 +42,7 @@ final class AccountController extends AbstractController
             } else {
                 try {
                     $updateUserHandler->handle(new UpdateUserCommand(
-                        email: (string) $currentUser->getEmail()->value,
+                        email: (string) $currentUser->email,
                         currentPassword: $currentPassword,
                         contactInfo: $contactInfo,
                         //todo this should always have a group id
@@ -61,8 +61,8 @@ final class AccountController extends AbstractController
 
         return $this->render('account/edit.html.twig', [
             'errors' => $errors,
-            'email' => (string) $currentUser->getEmail()->value,
-            'contactInfo' => $contactInfo->value,
+            'email' => (string) $currentUser->email,
+            'contactInfo' => $contactInfo,
         ]);
     }
 }

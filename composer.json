@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "doctrine/dbal": "*",
         "doctrine/doctrine-migrations-bundle": "*",
+        "doctrine/orm": "^3.6",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
         "symfony/console": "6.4.*",

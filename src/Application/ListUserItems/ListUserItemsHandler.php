@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Application\ListUserItems;
 
 use App\Domain\Item\ItemEntity;
-use App\Domain\Item\ItemRepositoryInterface;
+use App\Application\Repository\ItemQueryRepositoryInterface;
 
 final class ListUserItemsHandler
 {
     public function __construct(
-        private readonly ItemRepositoryInterface $itemRepository,
+        private readonly ItemQueryRepositoryInterface $itemRepository,
     ) {
     }
 

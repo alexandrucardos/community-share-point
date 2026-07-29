@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Application\CreateUser\CreateUserCommand;
 use App\Application\CreateUser\CreateUserHandler;
-use App\Domain\User\Exception\EmailAlreadyRegisteredException;
+use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -60,7 +60,7 @@ final class AuthController extends AbstractController
                     $this->addFlash('success', 'Your account has been created, you can now log in.');
 
                     return $this->redirectToRoute('app_login');
-                } catch (\InvalidArgumentException|EmailAlreadyRegisteredException $exception) {
+                } catch (\InvalidArgumentException|EmailAndGroupAlreadyRegisteredException $exception) {
                     $errors[] = $exception->getMessage();
                 }
             }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\CreateUser;
 
-use App\Domain\User\Exception\EmailAlreadyRegisteredException;
+use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
 use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
@@ -40,7 +40,7 @@ final class CreateUserHandler
         );
 
         if ($existingUser !== null) {
-            throw new EmailAlreadyRegisteredException($command->email);
+            throw new EmailAndGroupAlreadyRegisteredException($command->email);
         }
 
         $user = new UserEntity(($this->uuidValueObject)($this->uuid->generate()));

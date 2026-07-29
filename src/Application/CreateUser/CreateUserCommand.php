@@ -10,6 +10,7 @@ final class CreateUserCommand
         public readonly string $email,
         public readonly string $plainPassword,
         public readonly string $contactInfo,
+        public readonly string $groupId,
     ) {
     }
 }

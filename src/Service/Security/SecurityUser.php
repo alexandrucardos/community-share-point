@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Service\Security;
 
-use App\Domain\User\UserEntity;
+use App\Application\LoadUser\LoadUserDto;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct(
-        private readonly UserEntity $user,
+        private readonly LoadUserDto $loadUserDto,
     ) {
     }
 
-    public function getUser(): UserEntity
+    public function getLoadUserDto(): LoadUserDto
     {
-        return $this->user;
+        return $this->loadUserDto;
     }
 
     public function getRoles(): array
@@ -27,7 +27,7 @@ final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInte
 
     public function getPassword(): string
     {
-        return $this->user->getHashedPassword();
+        return $this->loadUserDto->hashedPassword;
     }
 
     public function eraseCredentials(): void
@@ -36,6 +36,6 @@ final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInte
 
     public function getUserIdentifier(): string
     {
-        return (string) $this->user->getEmail()->value;
+        return $this->loadUserDto->id;
     }
 }

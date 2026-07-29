@@ -10,6 +10,7 @@ use App\Application\ListGroupItems\ListGroupItemsHandler;
 use App\Application\ListGroupItems\ListGroupItemsQuery;
 use App\Application\ListUserItems\ListUserItemsHandler;
 use App\Application\ListUserItems\ListUserItemsQuery;
+use App\Application\LoadUser\LoadUserDto;
 use App\Application\UpdateItem\UpdateItemCommand;
 use App\Application\UpdateItem\UpdateItemHandler;
 use App\Domain\Item\Exception\ItemAccessDeniedException;
@@ -32,7 +33,7 @@ final class HouseholdItemsController extends AbstractController
     public function index(ListUserItemsHandler $listUserItemsHandler): Response
     {
         return $this->render('household_items/index.html.twig', [
-            'items' => $listUserItemsHandler->handle(new ListUserItemsQuery($this->currentUser()->getId()->value)),
+            'items' => $listUserItemsHandler->handle(new ListUserItemsQuery($this->currentUser()->id)),
         ]);
     }
 
@@ -40,8 +41,8 @@ final class HouseholdItemsController extends AbstractController
     public function group(ListGroupItemsHandler $listGroupItemsHandler): Response
     {
         return $this->render('household_items/group.html.twig', [
-            'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($this->currentUser()->getGroupId()->value)),
-            'currentUserId' => $this->currentUser()->getId()->value,
+            'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($this->currentUser()->groupId)),
+            'currentUserId' => $this->currentUser()->id,
         ]);
     }
 
@@ -69,7 +70,7 @@ final class HouseholdItemsController extends AbstractController
                         : null;
 
                     $addItemHandler->handle(new AddItemCommand(
-                        userId: $this->currentUser()->getId()->value,
+                        userId: $this->currentUser()->id,
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),
@@ -104,7 +105,7 @@ final class HouseholdItemsController extends AbstractController
     {
         $item = $itemRepository->findById($id);
 
-        if ($item === null || $item->getUserId()->value !== $this->currentUser()->getId()->value) {
+        if ($item === null || $item->getUserId()->value !== $this->currentUser()->id) {
             throw $this->createNotFoundException('Item not found.');
         }
 
@@ -130,7 +131,7 @@ final class HouseholdItemsController extends AbstractController
 
                     $updateItemHandler->handle(new UpdateItemCommand(
                         itemId: $id,
-                        userId: $this->currentUser()->getId()->value,
+                        userId: $this->currentUser()->id,
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),
@@ -160,7 +161,7 @@ final class HouseholdItemsController extends AbstractController
         ]);
     }
 
-    private function currentUser(): UserEntity
+    private function currentUser(): LoadUserDto
     {
         $securityUser = $this->getUser();
 
@@ -168,6 +169,6 @@ final class HouseholdItemsController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        return $securityUser->getUser();
+        return $securityUser->getLoadUserDto();
     }
 }

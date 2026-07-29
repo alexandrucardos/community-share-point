@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service\Security;
 
-use App\Application\LoadUser\LoadUserDto;
 use App\Application\LoadUser\LoadUserQuery;
+use App\Application\LoadUser\LoadUserHandler;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -16,22 +16,17 @@ final class AppUserProvider implements UserProviderInterface
     //todo remove this hardcoded value
     public const DEFAULT_GROUP_ID = '86468911-0B9F-4C7C-8127-3C3B9CBB5DAD';
     public function __construct(
-        private readonly LoadUserQuery $loadUserQuery,
+        private readonly LoadUserHandler $loadUserQuery,
     ) {
     }
 
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        $loadUserDto = new LoadUserDto(
-            email: $identifier,
-            groupId: self::DEFAULT_GROUP_ID
-        );
-
-        $user = $this->loadUserQuery->query($loadUserDto);
+        $user = $this->loadUserQuery->query(new LoadUserQuery($identifier));
 
 
         if ($user === null) {
-            throw new UserNotFoundException(sprintf('No account found for email "%s".', $identifier));
+            throw new UserNotFoundException(sprintf('No account found for userId "%s".', $identifier));
         }
 
         return new SecurityUser($user);

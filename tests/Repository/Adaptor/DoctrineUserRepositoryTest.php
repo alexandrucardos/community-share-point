@@ -8,39 +8,56 @@ use App\Domain\User\UserEntity;
 use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
-use App\Repository\Adaptor\SqliteUserRepository;
+use App\Repository\Adaptor\DoctrineUserRepository;
+use App\Repository\Doctrine\Entity\UserRecord;
+use App\Repository\Doctrine\UserRecordRepository;
 use App\Service\ValidationService\ValidatorService;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMSetup;
+use Doctrine\ORM\Tools\SchemaTool;
+use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\Translator;
 
-final class SqliteUserRepositoryTest extends TestCase
+/**
+ * Drives the adaptor against a real (in-memory) Doctrine ORM stack so the
+ * UserRecord mapping and the Record <-> domain translation are both exercised.
+ */
+final class DoctrineUserRepositoryTest extends TestCase
 {
     private const GROUP_ID = '94926cac-00e0-4e5f-8633-87b9918a90e4';
 
-    private Connection $connection;
+    private DoctrineUserRepository $repository;
     private ValidatorService $validator;
 
     protected function setUp(): void
     {
         $this->validator = new ValidatorService($this->createTranslator());
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true,
-        ]);
-        $this->connection->executeStatement(<<<'SQL'
-            CREATE TABLE users (
-                id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL,
-                contact_info TEXT NOT NULL, group_id TEXT NOT NULL
-            )
-            SQL);
+
+        $config = ORMSetup::createAttributeMetadataConfiguration(
+            [dirname(__DIR__, 3).'/src/Repository/Doctrine/Entity'],
+            isDevMode: true,
+        );
+        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true], $config);
+        $entityManager = new EntityManager($connection, $config);
+
+        $schemaTool = new SchemaTool($entityManager);
+        $schemaTool->createSchema($entityManager->getMetadataFactory()->getAllMetadata());
+
+        $registry = $this->createStub(ManagerRegistry::class);
+        $registry->method('getManagerForClass')->willReturn($entityManager);
+
+        $this->repository = new DoctrineUserRepository(
+            new UserRecordRepository($registry),
+            $this->validator,
+        );
     }
 
     public function testFindByEmailReturnsNullWhenNoUserWasStored(): void
     {
-        $found = $this->createRepository()->findByEmailAndGroupId(
+        $found = $this->repository->findByEmailAndGroupId(
             $this->email('missing@example.com'),
             $this->uuid(self::GROUP_ID),
         );
@@ -50,11 +67,9 @@ final class SqliteUserRepositoryTest extends TestCase
 
     public function testAddThenFindByEmailReturnsTheStoredUser(): void
     {
-        $repository = $this->createRepository();
+        $this->repository->add($this->buildUser('11111111-1111-4111-8111-111111111111', 'jane.doe@example.com'));
 
-        $repository->add($this->buildUser('11111111-1111-4111-8111-111111111111', 'jane.doe@example.com'));
-
-        $found = $repository->findByEmailAndGroupId(
+        $found = $this->repository->findByEmailAndGroupId(
             $this->email('jane.doe@example.com'),
             $this->uuid(self::GROUP_ID),
         );
@@ -69,28 +84,17 @@ final class SqliteUserRepositoryTest extends TestCase
 
     public function testUpdateOverwritesTheExistingRow(): void
     {
-        $repository = $this->createRepository();
         $id = '22222222-2222-4222-8222-222222222222';
 
-        $repository->add($this->buildUser($id, 'before@example.com'));
+        $this->repository->add($this->buildUser($id, 'before@example.com'));
+        $this->repository->update($this->buildUser($id, 'after@example.com'));
 
-        $repository->update($this->buildUser($id, 'after@example.com'));
-
-        $reloaded = $repository->findById($id);
+        $reloaded = $this->repository->findByEmailAndGroupId(
+            $this->email('after@example.com'),
+            $this->uuid(self::GROUP_ID),
+        );
         self::assertNotNull($reloaded);
         self::assertSame('after@example.com', $reloaded->getEmail()->value);
-    }
-
-    public function testFindAllByGroupIdReturnsEveryMemberOfTheGroup(): void
-    {
-        $repository = $this->createRepository();
-
-        $repository->add($this->buildUser('33333333-3333-4333-8333-333333333333', 'a@example.com'));
-        $repository->add($this->buildUser('44444444-4444-4444-8444-444444444444', 'b@example.com'));
-
-        $members = $repository->findAllByGroupId(self::GROUP_ID);
-
-        self::assertCount(2, $members);
     }
 
     private function buildUser(string $id, string $email): UserEntity
@@ -98,15 +102,10 @@ final class SqliteUserRepositoryTest extends TestCase
         $user = new UserEntity($this->uuid($id));
         $user->setEmail($this->email($email));
         $user->setHashedPassword('hashed-password');
-        $user->setContactInfo(($this->contactInfo())('+40 700 000 000'));
+        $user->setContactInfo((new ContactInfoValueObject($this->validator))('+40 700 000 000'));
         $user->setGroupId($this->uuid(self::GROUP_ID));
 
         return $user;
-    }
-
-    private function createRepository(): SqliteUserRepository
-    {
-        return new SqliteUserRepository($this->connection, $this->validator);
     }
 
     private function email(string $value): EmailValueObject
@@ -117,11 +116,6 @@ final class SqliteUserRepositoryTest extends TestCase
     private function uuid(string $value): UuidValueObject
     {
         return (new UuidValueObject($this->validator))($value);
-    }
-
-    private function contactInfo(): ContactInfoValueObject
-    {
-        return new ContactInfoValueObject($this->validator);
     }
 
     private function createTranslator(): Translator
