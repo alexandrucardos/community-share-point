@@ -111,8 +111,6 @@ final class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
                 new LoadUserByEmailAndGroupQuery($email, $groupId),
             );
         } catch (\InvalidArgumentException) {
-            // A malformed email or group id fails validation inside the query;
-            // treat it as bad credentials rather than a server error.
             $user = null;
         }
 

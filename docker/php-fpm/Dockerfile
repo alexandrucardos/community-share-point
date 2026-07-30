@@ -1,11 +1,5 @@
 FROM php:8.1-fpm-alpine
 
-#RUN apk update
-#
-#RUN docker-php-ext-install pdo
-#RUN docker-php-ext-install pdo_mysql
-#RUN docker-php-ext-enable pdo_mysql
-
 RUN apk update \
      && apk add --no-cache freetype-dev libjpeg-turbo-dev libpng-dev libwebp-dev \
         imagemagick imagemagick-dev imagemagick-heic libheif libheif-dev  autoconf g++ make \

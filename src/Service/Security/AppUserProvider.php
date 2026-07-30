@@ -13,8 +13,6 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 final class AppUserProvider implements UserProviderInterface
 {
-    //todo remove this hardcoded value
-    public const DEFAULT_GROUP_ID = '86468911-0B9F-4C7C-8127-3C3B9CBB5DAD';
     public function __construct(
         private readonly LoadUserHandler $loadUserQuery,
     ) {

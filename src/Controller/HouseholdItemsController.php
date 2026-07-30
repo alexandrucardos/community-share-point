@@ -43,7 +43,6 @@ final class HouseholdItemsController extends AbstractController
     #[Route('/items/group', name: 'household_items_group', methods: ['GET'])]
     public function group(string $uuid, ListGroupItemsHandler $listGroupItemsHandler): Response
     {
-        // Public listing: anyone can browse a group's shared items via its uuid.
         $securityUser = $this->getUser();
         $currentUserId = $securityUser instanceof SecurityUser
             ? $securityUser->getLoadUserDto()->id

@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'users')]
 #[ORM\Index(fields: ['groupId'])]
 #[ORM\UniqueConstraint(name: 'uniq_users_email_group', columns: ['email', 'group_id'])]
+#[ORM\HasLifecycleCallbacks]
 class User
 {
     #[ORM\Id]
@@ -28,4 +29,13 @@ class User
 
     #[ORM\Column(name: 'group_id', type: 'string')]
     public string $groupId;
+
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
+    public \DateTimeImmutable $createdAt;
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 }

@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ItemRepository::class)]
 #[ORM\Table(name: 'items')]
 #[ORM\Index(fields: ['userId'])]
+#[ORM\HasLifecycleCallbacks]
 class Item
 {
     #[ORM\Id]
@@ -38,4 +39,13 @@ class Item
      */
     #[ORM\Column(name: 'image_url', type: 'text', options: ['default' => ''])]
     public string $imageUrl = '';
+
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
+    public \DateTimeImmutable $createdAt;
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 }

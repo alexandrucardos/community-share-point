@@ -1,0 +1,59 @@
+{#
+    Standalone 404 page. It deliberately does NOT extend base.html.twig: that
+    layout's nav generates group-scoped URLs (path('app_login'), etc.) which
+    require a {uuid}. On a request without one — the very case that produces a
+    404 here — rendering that nav would throw again while building the error
+    page. So this template stays self-contained.
+#}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ 'Page not found'|trans }}</title>
+        <style>
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #f3f4f6;
+                color: #111827;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+            .error-card {
+                text-align: center;
+                background: #ffffff;
+                padding: 3rem 2.5rem;
+                border-radius: 12px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                max-width: 28rem;
+                margin: 1.5rem;
+            }
+            .error-card__code {
+                font-size: 4rem;
+                font-weight: 700;
+                line-height: 1;
+                margin: 0;
+                color: #111827;
+            }
+            .error-card__title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin: 1rem 0 0.5rem;
+            }
+            .error-card__text {
+                margin: 0;
+                color: #6b7280;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="error-card">
+            <p class="error-card__code">404</p>
+            <h1 class="error-card__title">{{ 'Page not found'|trans }}</h1>
+            <p class="error-card__text">{{ "The page you are looking for doesn't exist or has moved."|trans }}</p>
+        </main>
+    </body>
+</html>
