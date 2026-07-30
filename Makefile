@@ -1,5 +1,5 @@
 PROJECT_NAME := comunity-share-point
-ZIP_NAME := $(PROJECT_NAME)-v3.zip
+ZIP_NAME := $(PROJECT_NAME)-v4.zip
 
 all: install zip
 
