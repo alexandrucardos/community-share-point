@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Security;
 
-use App\Application\LoadUser\LoadUserDto;
-use App\Application\LoadUserByEmailAndGroup\LoadUserByEmailAndGroupDto;
-use App\Application\LoadUserByEmailAndGroup\LoadUserByEmailAndGroupHandler;
-use App\Application\LoadUserByEmailAndGroup\LoadUserByEmailAndGroupQuery;
+use App\Application\User\GetUser\UserView;
+use App\Application\User\GetUserByEmailAndGroup\GetUserByEmailAndGroupHandler;
+use App\Application\User\GetUserByEmailAndGroup\GetUserByEmailAndGroupQuery;
+use App\Application\User\GetUserByEmailAndGroup\UserCredentialsView;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,7 +33,7 @@ use Symfony\Component\Security\Http\SecurityRequestAttributes;
 final class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     public function __construct(
-        private readonly LoadUserByEmailAndGroupHandler $loadUserByEmailAndGroup,
+        private readonly GetUserByEmailAndGroupHandler $loadUserByEmailAndGroup,
         private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
@@ -71,7 +71,7 @@ final class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
     {
         $user = $token->getUser();
         $groupId = $user instanceof SecurityUser
-            ? $user->getLoadUserDto()->groupId
+            ? $user->getUserView()->groupId
             : $this->groupId($request);
 
         return new RedirectResponse(
@@ -104,11 +104,11 @@ final class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         return (string) $request->attributes->get('uuid', '');
     }
 
-    private function loadUser(string $email, string $groupId): LoadUserByEmailAndGroupDto
+    private function loadUser(string $email, string $groupId): UserCredentialsView
     {
         try {
             $user = $this->loadUserByEmailAndGroup->query(
-                new LoadUserByEmailAndGroupQuery($email, $groupId),
+                new GetUserByEmailAndGroupQuery($email, $groupId),
             );
         } catch (\InvalidArgumentException) {
             $user = null;
@@ -125,9 +125,9 @@ final class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
      * Adapt the login read model into the shared session model that
      * {@see SecurityUser} (and the id-based refresh path) speak in.
      */
-    private function toSessionUser(LoadUserByEmailAndGroupDto $user): LoadUserDto
+    private function toSessionUser(UserCredentialsView $user): UserView
     {
-        return new LoadUserDto(
+        return new UserView(
             id: $user->id,
             hashedPassword: $user->hashedPassword,
             contactInfo: $user->contactInfo,

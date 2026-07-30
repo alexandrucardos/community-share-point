@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Application\UpdateUser\UpdateUserCommand;
-use App\Application\UpdateUser\UpdateUserHandler;
+use App\Application\User\UpdateUser\UpdateUserCommand;
+use App\Application\User\UpdateUser\UpdateUserHandler;
 use App\Domain\User\Exception\InvalidCurrentPasswordException;
 use App\Domain\User\Exception\UserNotFoundException;
 use App\Service\Security\SecurityUser;
@@ -25,7 +25,7 @@ final class AccountController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $currentUser = $securityUser->getLoadUserDto();
+        $currentUser = $securityUser->getUserView();
 
         if (strcasecmp($uuid, $currentUser->groupId) !== 0) {
             throw $this->createAccessDeniedException();

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repository\Adaptor;
 
-use App\Application\LoadUser\LoadUserDto;
-use App\Application\LoadUserByEmailAndGroup\LoadUserByEmailAndGroupDto;
-use App\Application\Repository\UserQueryRepositoryInterface;
+use App\Application\User\GetUser\UserView;
+use App\Application\User\GetUserByEmailAndGroup\UserCredentialsView;
+use App\Application\User\UserQueryRepositoryInterface;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 use App\Entity\User;
@@ -20,7 +20,7 @@ final class UserQueryRepositoryAdaptor implements UserQueryRepositoryInterface
     {
 
     }
-    public function findById(UuidValueObject $userId): ?LoadUserDto
+    public function findById(UuidValueObject $userId): ?UserView
     {
          $record = $this->userRepository->find($userId->value);
 
@@ -30,7 +30,7 @@ final class UserQueryRepositoryAdaptor implements UserQueryRepositoryInterface
     public function findByEmailAndGroupId(
         EmailValueObject $email,
         UuidValueObject $groupId,
-    ): ?LoadUserByEmailAndGroupDto
+    ): ?UserCredentialsView
     {
         $record = $this->userRepository->findByEmailAndGroupId($email->value, $groupId->value);
 
@@ -38,7 +38,7 @@ final class UserQueryRepositoryAdaptor implements UserQueryRepositoryInterface
             return null;
         }
 
-        return new LoadUserByEmailAndGroupDto(
+        return new UserCredentialsView(
             id: $record->id,
             hashedPassword: $record->password,
             contactInfo: $record->contactInfo,
@@ -47,9 +47,9 @@ final class UserQueryRepositoryAdaptor implements UserQueryRepositoryInterface
         );
     }
 
-    private function toDomain(User $record):LoadUserDto
+    private function toDomain(User $record):UserView
     {
-        return new LoadUserDto(
+        return new UserView(
             id: $record->id,
             hashedPassword: $record->password,
             contactInfo: $record->contactInfo,

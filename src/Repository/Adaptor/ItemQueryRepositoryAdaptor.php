@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repository\Adaptor;
 
-use App\Application\ListGroupItems\ListGroupItemsDto;
-use App\Application\ListUserItems\ListUserItemsDto;
-use App\Application\Repository\ItemQueryRepositoryInterface;
+use App\Application\Item\ItemQueryRepositoryInterface;
+use App\Application\Item\ListGroupItems\GroupItemView;
+use App\Application\Item\ListUserItems\UserItemView;
 use App\Domain\Item\ItemStatus;
 use App\Entity\Item;
 use App\Repository\ItemRepository;
@@ -33,7 +33,7 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
     ): array
     {
         return array_map(
-            fn (Item $record): ListUserItemsDto => new ListUserItemsDto(
+            fn (Item $record): UserItemView => new UserItemView(
                 id: $record->id,
                 name: $record->name,
                 status: $record->status,
@@ -57,7 +57,7 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
         );
 
         return array_map(
-            fn (Item $record): ListGroupItemsDto => new ListGroupItemsDto(
+            fn (Item $record): GroupItemView => new GroupItemView(
                 id: $record->id,
                 name: $record->name,
                 status: $record->status,

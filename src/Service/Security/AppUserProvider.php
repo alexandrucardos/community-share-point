@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service\Security;
 
-use App\Application\LoadUser\LoadUserQuery;
-use App\Application\LoadUser\LoadUserHandler;
+use App\Application\User\GetUser\GetUserHandler;
+use App\Application\User\GetUser\GetUserQuery;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -14,13 +14,13 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 final class AppUserProvider implements UserProviderInterface
 {
     public function __construct(
-        private readonly LoadUserHandler $loadUserQuery,
+        private readonly GetUserHandler $loadUserQuery,
     ) {
     }
 
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        $user = $this->loadUserQuery->query(new LoadUserQuery($identifier));
+        $user = $this->loadUserQuery->query(new GetUserQuery($identifier));
 
 
         if ($user === null) {

@@ -32,7 +32,7 @@ final class LogoutRedirectSubscriber implements EventSubscriberInterface
         }
 
         $event->setResponse(new RedirectResponse(
-            $this->urlGenerator->generate('app_login', ['uuid' => $user->getLoadUserDto()->groupId]),
+            $this->urlGenerator->generate('app_login', ['uuid' => $user->getUserView()->groupId]),
         ));
     }
 

@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Application\AddItem\AddItemCommand;
-use App\Application\AddItem\AddItemHandler;
-use App\Application\ListGroupItems\ListGroupItemsHandler;
-use App\Application\ListGroupItems\ListGroupItemsQuery;
-use App\Application\ListUserItems\ListUserItemsHandler;
-use App\Application\ListUserItems\ListUserItemsQuery;
-use App\Application\LoadUser\LoadUserDto;
-use App\Application\UpdateItem\UpdateItemCommand;
-use App\Application\UpdateItem\UpdateItemHandler;
+use App\Application\Item\CreateItem\CreateItemCommand;
+use App\Application\Item\CreateItem\CreateItemHandler;
+use App\Application\Item\ListGroupItems\ListGroupItemsHandler;
+use App\Application\Item\ListGroupItems\ListGroupItemsQuery;
+use App\Application\Item\ListUserItems\ListUserItemsHandler;
+use App\Application\Item\ListUserItems\ListUserItemsQuery;
+use App\Application\Item\UpdateItem\UpdateItemCommand;
+use App\Application\Item\UpdateItem\UpdateItemHandler;
+use App\Application\User\GetUser\UserView;
 use App\Domain\Item\Exception\ItemAccessDeniedException;
 use App\Domain\Item\Exception\ItemNotFoundException;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\Item\ItemStatus;
-use App\Domain\User\UserEntity;
 use App\Service\Image\ImageUploader;
 use App\Service\Security\SecurityUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -45,7 +44,7 @@ final class HouseholdItemsController extends AbstractController
     {
         $securityUser = $this->getUser();
         $currentUserId = $securityUser instanceof SecurityUser
-            ? $securityUser->getLoadUserDto()->id
+            ? $securityUser->getUserView()->id
             : null;
 
         return $this->render('household_items/group.html.twig', [
@@ -55,7 +54,7 @@ final class HouseholdItemsController extends AbstractController
     }
 
     #[Route('/items/new', name: 'household_items_new', methods: ['GET', 'POST'])]
-    public function new(string $uuid, Request $request, AddItemHandler $addItemHandler, ImageUploader $imageUploader): Response
+    public function new(string $uuid, Request $request, CreateItemHandler $addItemHandler, ImageUploader $imageUploader): Response
     {
         $this->assertGroup($uuid);
 
@@ -79,7 +78,7 @@ final class HouseholdItemsController extends AbstractController
                         ? $imageUploader->upload($imageFile, self::IMAGE_SUBDIRECTORY)
                         : null;
 
-                    $addItemHandler->handle(new AddItemCommand(
+                    $addItemHandler->handle(new CreateItemCommand(
                         userId: $this->currentUser()->id,
                         name: $name,
                         description: $description,
@@ -173,7 +172,7 @@ final class HouseholdItemsController extends AbstractController
         ]);
     }
 
-    private function currentUser(): LoadUserDto
+    private function currentUser(): UserView
     {
         $securityUser = $this->getUser();
 
@@ -181,7 +180,7 @@ final class HouseholdItemsController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        return $securityUser->getLoadUserDto();
+        return $securityUser->getUserView();
     }
 
     /**

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Service\Security;
 
-use App\Application\LoadUser\LoadUserDto;
+use App\Application\User\GetUser\UserView;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public function __construct(
-        private readonly LoadUserDto $loadUserDto,
+        private readonly UserView $loadUserDto,
     ) {
     }
 
-    public function getLoadUserDto(): LoadUserDto
+    public function getUserView(): UserView
     {
         return $this->loadUserDto;
     }

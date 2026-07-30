@@ -56,11 +56,12 @@ final class UserRepositoryAdaptor implements UserRepositoryInterface
     private function toDomain(User $record): UserEntity
     {
         $user = new UserEntity(
-            (new EmailValueObject($this->validator))($record->email),
-            (new UuidValueObject($this->validator))($record->groupId),
+            (new UuidValueObject($this->validator))($record->id),
         );
         $user->setHashedPassword($record->password);
         $user->setContactInfo((new ContactInfoValueObject($this->validator))($record->contactInfo));
+        $user->setEmail((new EmailValueObject($this->validator))($record->email));
+        $user->setGroupId((new UuidValueObject($this->validator))($record->groupId));
 
         return $user;
     }

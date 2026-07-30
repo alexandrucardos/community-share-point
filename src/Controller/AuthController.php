@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Application\CreateUser\CreateUserCommand;
-use App\Application\CreateUser\CreateUserHandler;
+use App\Application\User\CreateUser\CreateUserCommand;
+use App\Application\User\CreateUser\CreateUserHandler;
 use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;

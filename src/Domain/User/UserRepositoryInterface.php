@@ -16,5 +16,5 @@ interface UserRepositoryInterface
     public function findByEmailAndGroupId(
         EmailValueObject $email,
         UuidValueObject $groupId
-    );
+    ):?UserEntity;
 }
