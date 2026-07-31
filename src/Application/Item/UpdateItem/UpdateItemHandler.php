@@ -43,7 +43,7 @@ final class UpdateItemHandler
         if ($command->fileInfo !== null) {
             $item->setFileExtension($command->fileInfo->fileExtension);
             $item->setFileName($command->fileInfo->fileName);
-            $item->setFileContent($command->fileInfo->fileName);
+            $item->setFileContent($command->fileInfo->fileContent);
             $item->setContainsFile(true);
         }
 

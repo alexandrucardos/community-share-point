@@ -9,11 +9,9 @@ use App\Domain\Item\ItemEntity;
 
 final class ImageUploader
 {
-    private const IMAGE_SUBDIRECTORY = 'images/items';
-
     public function __construct(
         private readonly string $projectDir,
-        private readonly string $imageBasePath,
+        private readonly string $imagesBasePath,
     ) {
     }
 
@@ -21,7 +19,7 @@ final class ImageUploader
         ItemEntity $item
     ): void
     {
-        $directory = $this->projectDir.'/public'.$this->imageBasePath;
+        $directory = $this->projectDir.'/public'.$this->imagesBasePath;
 
         if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
             throw new \RuntimeException(sprintf('Unable to create directory "%s".', $directory));
@@ -54,7 +52,7 @@ final class ImageUploader
             imagesavealpha($thumbnail, true);
 
 
-            $directory = $this->projectDir.'/public'.$this->imageBasePath;
+            $directory = $this->projectDir.'/public'.$this->imagesBasePath;
             $target = $directory.'/'.$item->getFileName().'.'.$item->getFileExtension()->value;
 
             try {
