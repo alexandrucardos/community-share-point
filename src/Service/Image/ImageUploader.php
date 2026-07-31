@@ -19,7 +19,7 @@ final class ImageUploader
         ItemEntity $item
     ): void
     {
-        $directory = $this->projectDir.'/public'.$this->imagesBasePath;
+        $directory = $this->projectDir.'/public/images/items';
 
         if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
             throw new \RuntimeException(sprintf('Unable to create directory "%s".', $directory));
