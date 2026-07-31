@@ -2,20 +2,44 @@
 
 namespace App\Domain\Item;
 
+use App\Domain\Item\Exception\InvalidFileExtensionException;
+use App\Domain\ValueObject\FileValueObject;
+use App\Domain\ValueObject\UuidValueObject;
+
 final class ItemEntity
 {
+    private const FILE_MAX_SIZE = 300;
+
     private string $name;
     private string $description;
     private string $status;
-    private string $imageUrl;
+    private UuidValueObject $userId;
+    private FileExtension $fileExtension;
+    private string $fileName;
+    private int $fileSize;
+
+    private string $fileContent;
+
+    private bool $containsFile = false;
 
     public function __construct(
-        private string $id,
+        private UuidValueObject $id,
     ){
+        $this->fileSize = self::FILE_MAX_SIZE;
     }
-    public function getId(): string
+    public function getId(): UuidValueObject
     {
         return $this->id;
+    }
+
+    public function getUserId(): UuidValueObject
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(UuidValueObject $userId): void
+    {
+        $this->userId = $userId;
     }
 
     public function getName(): string
@@ -48,14 +72,50 @@ final class ItemEntity
         $this->status = $status;
     }
 
-    public function getImageUrl(): string
+    public function setFileExtension(string $fileExtension): void
     {
-        return $this->imageUrl;
+        if (!in_array($fileExtension, FileExtension::all(), true)) {
+            throw new InvalidFileExtensionException('Please upload a JPG, JPEG, PNG, GIF, or WEBP image.');
+        }
+
+        $this->fileExtension = FileExtension::from($fileExtension);
     }
 
-    public function setImageUrl(string $imageUrl): void
+    public function getFileExtension(): FileExtension
     {
-        $this->imageUrl = $imageUrl;
+        return $this->fileExtension;
     }
 
+    public function getFileName(): string
+    {
+        return $this->fileName;
+    }
+
+    public function setFileName(string $fileName): void
+    {
+        $this->fileName = $fileName;
+    }
+
+    public function getFileSize(): int
+    {
+        return $this->fileSize;
+    }
+
+    public function setFileContent(string $fileContent): void
+    {
+        $this->fileContent = $fileContent;
+    }
+    public function getFileContent(): string
+    {
+        return $this->fileContent;
+    }
+
+    public function isContainsFile(): bool
+    {
+        return $this->containsFile;
+    }
+    public function setContainsFile(bool $containsFile): void
+    {
+        $this->containsFile = $containsFile;
+    }
 }

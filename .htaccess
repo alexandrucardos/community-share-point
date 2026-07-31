@@ -1,0 +1,35 @@
+# ----------------------------------------------------------------------
+# Block access to Symfony sensitive directories
+# ----------------------------------------------------------------------
+RedirectMatch 404 ^/(app|src|config|var|vendor|translations|tests|templates|migrations)(/|$)
+
+# Block access to environment files
+<FilesMatch "^\.env.*$">
+    Require all denied
+</FilesMatch>
+
+# Block access to composer files
+<FilesMatch "^(composer\.json|composer\.lock)$">
+    Require all denied
+</FilesMatch>
+
+# Block access to yaml, xml, twig, markdown, dist files
+<FilesMatch "\.(yaml|yml|xml|twig|md|dist)$">
+    Require all denied
+</FilesMatch>
+
+# Block access to Git and IDE files
+<FilesMatch "^(\.git|\.idea|\.vscode|\.svn)">
+    Require all denied
+</FilesMatch>
+
+# ----------------------------------------------------------------------
+# Redirect all requests to public/
+# (only if your app is inside a folder containing /public)
+# ----------------------------------------------------------------------
+RewriteEngine On
+
+# Only route to public/index.php if not a real file or directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/index.php [L]

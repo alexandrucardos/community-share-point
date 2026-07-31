@@ -4,19 +4,19 @@ declare(strict_types = 1);
 
 namespace App\Domain\ValueObject;
 
-use App\Domain\DTO\ConstraintDto;
+use App\Domain\ValueObject\DTO\ConstraintDto;
 
-final readonly class EmailValueObject
+final class EmailValueObject
 {
-    public mixed $value;
+    public readonly mixed $value;
 
     public function __construct(
-        private ValidatorInterface $validator
+        private readonly ValidatorInterface $validator
     )
     {
     }
 
-    public function __invoke(mixed $value): void
+    public function __invoke(mixed $value): self
     {
         $constraints = [
             new ConstraintDto(Constraint::NotNull),
@@ -36,5 +36,17 @@ final readonly class EmailValueObject
         );
 
         $this->value = $value;
+
+        return $this;
+    }
+
+    public function __serialize(): array
+    {
+        return ['value' => $this->value];
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->value = $data['value'];
     }
 }

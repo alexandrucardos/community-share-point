@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block body %}
+    <main class="auth-page">
+        <div class="auth-card">
+            <h1>{{ 'Sign up'|trans }}</h1>
+
+            {% if errors %}
+                <div class="auth-error">
+                    <ul>
+                        {% for error in errors %}
+                            <li>{{ error|trans }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ path('app_register') }}" class="auth-form">
+                <label for="email">{{ 'Email'|trans }}</label>
+                <input type="email" id="email" name="email" value="{{ email|default('') }}" required autofocus>
+
+                <label for="contactInfo">{{ 'Contact info'|trans }}</label>
+                <input type="text" id="contactInfo" name="contactInfo" value="{{ contactInfo|default('') }}" placeholder="{{ 'Phone number or address'|trans }}" required>
+
+                <label for="password">{{ 'Password'|trans }}</label>
+                <input type="password" id="password" name="password" required minlength="8">
+
+                <label for="password_confirmation">{{ 'Confirm password'|trans }}</label>
+                <input type="password" id="password_confirmation" name="password_confirmation" required minlength="8">
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('register') }}">
+
+                <button type="submit">{{ 'Create account'|trans }}</button>
+            </form>
+
+            <p class="auth-switch">{{ 'Already have an account?'|trans }} <a href="{{ path('app_login') }}">{{ 'Log in'|trans }}</a></p>
+        </div>
+    </main>
+{% endblock %}
