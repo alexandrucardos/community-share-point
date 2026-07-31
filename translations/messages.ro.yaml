@@ -64,7 +64,7 @@ item:
 "Password confirmation does not match.": "Confirmarea parolei nu se potrivește."
 "New password confirmation does not match.": "Confirmarea parolei noi nu se potrivește."
 "Please choose a valid status.": "Te rugăm să alegi o stare validă."
-"Please upload a JPG, PNG, GIF, or WEBP image.": "Te rugăm să încarci o imagine JPG, PNG, GIF sau WEBP."
+"Please upload a JPG, JPEG, PNG, GIF, or WEBP image.": "Te rugăm să încarci o imagine JPG, JPEG, PNG, GIF sau WEBP."
 "An account with this email already exists.": "Există deja un cont cu acest email."
 "No account was found for this email.": "Nu a fost găsit niciun cont pentru acest email."
 "The current password you entered is incorrect.": "Parola curentă introdusă este incorectă."

@@ -13,6 +13,7 @@ final class ImageUploader
 
     public function __construct(
         private readonly string $projectDir,
+        private readonly string $imageBasePath,
     ) {
     }
 
@@ -20,7 +21,7 @@ final class ImageUploader
         ItemEntity $item
     ): void
     {
-        $directory = $this->projectDir.'/assets/'.self::IMAGE_SUBDIRECTORY;
+        $directory = $this->projectDir.'/public'.$this->imageBasePath;
 
         if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
             throw new \RuntimeException(sprintf('Unable to create directory "%s".', $directory));
@@ -53,7 +54,7 @@ final class ImageUploader
             imagesavealpha($thumbnail, true);
 
 
-            $directory = $this->projectDir.'/assets/'.self::IMAGE_SUBDIRECTORY;
+            $directory = $this->projectDir.'/public'.$this->imageBasePath;
             $target = $directory.'/'.$item->getFileName().'.'.$item->getFileExtension()->value;
 
             try {

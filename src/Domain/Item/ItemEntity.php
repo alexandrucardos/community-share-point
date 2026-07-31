@@ -74,8 +74,8 @@ final class ItemEntity
 
     public function setFileExtension(string $fileExtension): void
     {
-        if (!in_array($fileExtension, FileExtension::cases(), true)) {
-            throw new InvalidFileExtensionException('Please upload a JPG, PNG, GIF, or WEBP image.');
+        if (!in_array($fileExtension, FileExtension::all(), true)) {
+            throw new InvalidFileExtensionException('Please upload a JPG, JPEG, PNG, GIF, or WEBP image.');
         }
 
         $this->fileExtension = FileExtension::from($fileExtension);

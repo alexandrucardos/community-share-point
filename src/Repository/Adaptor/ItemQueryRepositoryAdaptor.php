@@ -17,6 +17,8 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
     public function __construct(
         private readonly ItemRepository    $items,
         private readonly UserRepository    $users,
+        private readonly string $projectDir,
+        private readonly string $imagesBasePath,
     ) {
     }
 
@@ -64,7 +66,6 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
 
     private function imageUrl(Item $record): string
     {
-        //todo make a better thing
-        return $record->imageFilename;
+        return $this->imagesBasePath.'/'.$record->imageFilename;
     }
 }
