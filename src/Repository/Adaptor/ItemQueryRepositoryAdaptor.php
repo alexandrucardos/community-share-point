@@ -12,19 +12,11 @@ use App\Entity\Item;
 use App\Repository\ItemRepository;
 use App\Repository\UserRepository;
 
-/**
- * Adaptor: implements the query-side {@see ItemQueryRepositoryInterface} by
- * projecting {@see Item} rows straight into immutable read DTOs.
- *
- * No {@see \App\Domain\Item\ItemEntity} is reconstituted on this path — the
- * listing screens never pay the cost of hydrating aggregates.
- */
 final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
 {
     public function __construct(
         private readonly ItemRepository    $items,
         private readonly UserRepository    $users,
-        private readonly ItemImageResolver $imageResolver,
     ) {
     }
 
@@ -70,14 +62,9 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
         );
     }
 
-    /**
-     * Prefer the persisted URL; fall back to resolving it for rows written
-     * before the image_url column existed.
-     */
     private function imageUrl(Item $record): string
     {
-        return $record->imageUrl !== ''
-            ? $record->imageUrl
-            : $this->imageResolver->url($record->imageFilename, $record->name);
+        //todo make a better thing
+        return $record->imageFilename;
     }
 }

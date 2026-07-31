@@ -20,9 +20,6 @@ final class ItemRepository extends ServiceEntityRepository
         parent::__construct($registry, Item::class);
     }
 
-    /**
-     * Insert or update the record, keyed by its (application-assigned) id.
-     */
     public function save(Item $record): void
     {
         $manager = $this->getEntityManager();
@@ -36,7 +33,6 @@ final class ItemRepository extends ServiceEntityRepository
             $existing->description = $record->description;
             $existing->status = $record->status;
             $existing->imageFilename = $record->imageFilename;
-            $existing->imageUrl = $record->imageUrl;
         }
 
         $manager->flush();

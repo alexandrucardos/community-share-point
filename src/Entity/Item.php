@@ -32,14 +32,6 @@ class Item
     #[ORM\Column(name: 'image_filename', type: 'string', options: ['default' => ''])]
     public string $imageFilename = '';
 
-    /**
-     * The resolved display URL, computed and persisted on write (see
-     * {@see \App\Repository\Adaptor\ItemRepositoryAdaptor}). Stored as text
-     * because the placeholder fallback is an inline base64 SVG data URI.
-     */
-    #[ORM\Column(name: 'image_url', type: 'text', options: ['default' => ''])]
-    public string $imageUrl = '';
-
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     public \DateTimeImmutable $createdAt;
 

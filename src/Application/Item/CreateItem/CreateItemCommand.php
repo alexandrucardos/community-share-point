@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Item\CreateItem;
 
+use App\Application\Item\FileInfoDto;
 use App\Domain\Item\ItemStatus;
 
 final class CreateItemCommand
@@ -13,7 +14,7 @@ final class CreateItemCommand
         public readonly string $name,
         public readonly string $description,
         public readonly ItemStatus $status,
-        public readonly ?string $imageFilename = null,
+        public readonly ?FileInfoDto $fileInfo = null
     ) {
     }
 }

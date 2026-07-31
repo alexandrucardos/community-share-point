@@ -27,10 +27,12 @@ final class UpdateItemHandler
             throw new ItemNotFoundException($command->itemId);
         }
 
+        //todo maybe fix with voters in infra
         if ($item->getUserId()->value !== $command->userId) {
             throw new ItemAccessDeniedException();
         }
 
+        //todo are this necessary ?
         ($this->nameValidator)($command->name);
         ($this->descriptionValidator)($command->description);
 
@@ -38,8 +40,11 @@ final class UpdateItemHandler
         $item->setDescription($command->description);
         $item->setStatus($command->status->value);
 
-        if ($command->imageFilename !== null) {
-            $item->setImageFilename($command->imageFilename);
+        if ($command->fileInfo !== null) {
+            $item->setFileExtension($command->fileInfo->fileExtension);
+            $item->setFileName($command->fileInfo->fileName);
+            $item->setFileContent($command->fileInfo->fileName);
+            $item->setContainsFile(true);
         }
 
         $this->itemRepository->update($item);

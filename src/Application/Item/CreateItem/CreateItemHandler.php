@@ -27,14 +27,20 @@ final class CreateItemHandler
         ($this->nameValidator)($command->name);
         ($this->descriptionValidator)($command->description);
 
-        $item = new ItemEntity($this->uuid->generate());
+        $item = new ItemEntity(
+            ($this->uuidValueObject)($this->uuid->generate())
+        );
+
         $item->setUserId(($this->uuidValueObject)($command->userId));
         $item->setName($command->name);
         $item->setDescription($command->description);
         $item->setStatus($command->status->value);
 
-        if ($command->imageFilename !== null) {
-            $item->setImageFilename($command->imageFilename);
+        if ($command->fileInfo !== null) {
+            $item->setFileExtension($command->fileInfo->fileExtension);
+            $item->setFileName($command->fileInfo->fileName);
+            $item->setFileContent($command->fileInfo->fileName);
+            $item->setContainsFile(true);
         }
 
         $this->itemRepository->add($item);

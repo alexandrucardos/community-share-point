@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Application\Item\CreateItem\CreateItemCommand;
 use App\Application\Item\CreateItem\CreateItemHandler;
+use App\Application\Item\FileInfoDto;
 use App\Application\Item\ListGroupItems\ListGroupItemsHandler;
 use App\Application\Item\ListGroupItems\ListGroupItemsQuery;
 use App\Application\Item\ListUserItems\ListUserItemsHandler;
@@ -17,9 +18,11 @@ use App\Domain\Item\Exception\ItemAccessDeniedException;
 use App\Domain\Item\Exception\ItemNotFoundException;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\Item\ItemStatus;
+use App\Domain\ValueObject\FileValueObject;
 use App\Service\Image\ImageUploader;
 use App\Service\Security\SecurityUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -54,7 +57,11 @@ final class HouseholdItemsController extends AbstractController
     }
 
     #[Route('/items/new', name: 'household_items_new', methods: ['GET', 'POST'])]
-    public function new(string $uuid, Request $request, CreateItemHandler $addItemHandler, ImageUploader $imageUploader): Response
+    public function new(
+        string $uuid,
+        Request $request,
+        CreateItemHandler $addItemHandler,
+    ): Response
     {
         $this->assertGroup($uuid);
 
@@ -68,22 +75,23 @@ final class HouseholdItemsController extends AbstractController
             $name = (string) $request->request->get('name', '');
             $description = (string) $request->request->get('description', '');
             $status = (string) $request->request->get('status', '');
+            /** @var UploadedFile $imageFile */
             $imageFile = $request->files->get('image');
 
             if (!$this->isCsrfTokenValid('item_form', (string) $request->request->get('_csrf_token'))) {
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
-                    $imageFilename = $imageFile !== null
-                        ? $imageUploader->upload($imageFile, self::IMAGE_SUBDIRECTORY)
-                        : null;
-
                     $addItemHandler->handle(new CreateItemCommand(
                         userId: $this->currentUser()->id,
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),
-                        imageFilename: $imageFilename,
+                        fileInfo: $imageFile ? new FileInfoDto(
+                            fileName: $imageFile->getClientOriginalName(),
+                            fileExtension: strtolower($imageFile->getClientOriginalExtension()),
+                            fileContent: $imageFile->getContent()
+                        ) : null,
                     ));
 
                     $this->addFlash('success', 'Item added.');
@@ -124,7 +132,8 @@ final class HouseholdItemsController extends AbstractController
         $name = $item->getName();
         $description = $item->getDescription();
         $status = $item->getStatus();
-        $currentImageUrl = $item->getImageUrl();
+        //todo add url dynamic
+        $currentImageUrl = '';
 
         if ($request->isMethod('POST')) {
             $name = (string) $request->request->get('name', '');
@@ -136,17 +145,17 @@ final class HouseholdItemsController extends AbstractController
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
-                    $imageFilename = $imageFile !== null
-                        ? $imageUploader->upload($imageFile, self::IMAGE_SUBDIRECTORY)
-                        : null;
-
                     $updateItemHandler->handle(new UpdateItemCommand(
                         itemId: $id,
                         userId: $this->currentUser()->id,
                         name: $name,
                         description: $description,
                         status: ItemStatus::from($status),
-                        imageFilename: $imageFilename,
+                        fileInfo: $imageFile ? new FileInfoDto(
+                            fileName: $imageFile->getClientOriginalName(),
+                            fileExtension: strtolower($imageFile->getClientOriginalExtension()),
+                            fileContent: $imageFile->getContent()
+                        ) : null,
                     ));
 
                     $this->addFlash('success', 'Item updated.');

@@ -4,49 +4,36 @@ declare(strict_types=1);
 
 namespace App\Service\Image;
 
-use App\Domain\UuidInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use App\Domain\Item\FileExtension;
+use App\Domain\Item\ItemEntity;
 
 final class ImageUploader
 {
-    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-    private const THUMBNAIL_MAX_SIZE = 300;
+    private const IMAGE_SUBDIRECTORY = 'images/items';
 
     public function __construct(
         private readonly string $projectDir,
-        private readonly UuidInterface $uuid,
     ) {
     }
 
-    public function upload(UploadedFile $file, string $assetSubdirectory): string
+    public function upload(
+        ItemEntity $item
+    ): void
     {
-        $extension = strtolower($file->getClientOriginalExtension());
-
-        if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
-            throw new \InvalidArgumentException('Please upload a JPG, PNG, GIF, or WEBP image.');
-        }
-
-        $filename = $this->uuid->generate().'.'.$extension;
-        $directory = $this->projectDir.'/assets/'.$assetSubdirectory;
+        $directory = $this->projectDir.'/assets/'.self::IMAGE_SUBDIRECTORY;
 
         if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
             throw new \RuntimeException(sprintf('Unable to create directory "%s".', $directory));
         }
 
-        $this->encode($file, $extension, $directory.'/'.$filename);
-
-        return $filename;
+        $this->encode($item);
     }
 
-    /**
-     * Decodes the uploaded file, scales it down to a thumbnail and re-encodes
-     * it through GD, stripping any embedded metadata (EXIF, etc.) and
-     * guaranteeing the stored file is a valid image in the requested format.
-     */
-    private function encode(UploadedFile $file, string $extension, string $target): void
+    private function encode(
+        ItemEntity $item,
+    ): void
     {
-        $contents = file_get_contents($file->getPathname());
+        $contents = $item->getFileContent();
 
         if (false === $contents) {
             throw new \RuntimeException('Unable to read the uploaded image.');
@@ -59,19 +46,22 @@ final class ImageUploader
         }
 
         try {
-            $thumbnail = $this->resize($image);
+            $thumbnail = $this->resize($image, $item->getFileSize());
 
             // Preserve transparency for formats that support it.
             imagealphablending($thumbnail, false);
             imagesavealpha($thumbnail, true);
 
+
+            $directory = $this->projectDir.'/assets/'.self::IMAGE_SUBDIRECTORY;
+            $target = $directory.'/'.$item->getFileName().'.'.$item->getFileExtension()->value;
+
             try {
-                $encoded = match ($extension) {
-                    'jpg', 'jpeg' => imagejpeg($thumbnail, $target, 85),
-                    'png' => imagepng($thumbnail, $target),
-                    'gif' => imagegif($thumbnail, $target),
-                    'webp' => imagewebp($thumbnail, $target, 85),
-                    default => throw new \InvalidArgumentException('Unsupported image format.'),
+                $encoded = match ($item->getFileExtension()) {
+                    FileExtension::jpg, FileExtension::jpeg => imagejpeg($thumbnail, $target, 85),
+                    FileExtension::png => imagepng($thumbnail, $target),
+                    FileExtension::gif => imagegif($thumbnail, $target),
+                    FileExtension::webp => imagewebp($thumbnail, $target, 85),
                 };
             } finally {
                 if ($thumbnail !== $image) {
@@ -87,26 +77,17 @@ final class ImageUploader
         }
     }
 
-    /**
-     * Scales the image down so its longest edge fits THUMBNAIL_MAX_SIZE,
-     * preserving the aspect ratio. Images already within bounds are returned
-     * unchanged (no upscaling).
-     *
-     * @param \GdImage $image
-     *
-     * @return \GdImage
-     */
-    private function resize(\GdImage $image): \GdImage
+    private function resize(\GdImage $image, int $maxFileSize): \GdImage
     {
         $width = imagesx($image);
         $height = imagesy($image);
         $longestEdge = max($width, $height);
 
-        if ($longestEdge <= self::THUMBNAIL_MAX_SIZE) {
+        if ($longestEdge <= $maxFileSize) {
             return $image;
         }
 
-        $scale = self::THUMBNAIL_MAX_SIZE / $longestEdge;
+        $scale = $maxFileSize / $longestEdge;
         $targetWidth = max(1, (int) round($width * $scale));
         $targetHeight = max(1, (int) round($height * $scale));
 
@@ -125,14 +106,5 @@ final class ImageUploader
         imagecopyresampled($thumbnail, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
 
         return $thumbnail;
-    }
-
-    public function delete(string $filename, string $assetSubdirectory): void
-    {
-        $path = $this->projectDir.'/assets/'.$assetSubdirectory.'/'.$filename;
-
-        if (is_file($path)) {
-            unlink($path);
-        }
     }
 }
