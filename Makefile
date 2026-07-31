@@ -1,10 +1,13 @@
 PROJECT_NAME := comunity-share-point
 ZIP_NAME := $(PROJECT_NAME)-v4.zip
 
-all: install zip
+all: install assets zip
 
 install:
 	composer install # --no-dev --optimize-autoloader
+
+assets:
+	php bin/console asset-map:compile
 
 zip:
 	@echo "Creating $(ZIP_NAME) with root folder $(PROJECT_NAME)/"
