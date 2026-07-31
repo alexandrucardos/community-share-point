@@ -53,7 +53,7 @@ final class ImageUploader
 
 
             $directory = $this->projectDir.'/public'.$this->imagesBasePath;
-            $target = $directory.'/'.$item->getFileName().'.'.$item->getFileExtension()->value;
+            $target = $directory.'/'.$item->getFileName();
 
             try {
                 $encoded = match ($item->getFileExtension()) {

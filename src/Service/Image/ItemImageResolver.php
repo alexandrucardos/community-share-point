@@ -2,12 +2,24 @@
 
 declare(strict_types=1);
 
-namespace App\Repository\Adaptor;
+namespace App\Service\Image;
 
 
 final class ItemImageResolver
 {
     private const COLOR_PALETTE = ['2563eb', 'db2777', 'ea580c', '65a30d', '7c3aed', '0891b2'];
+
+    public function __construct(
+        private readonly string $imagesBasePath,
+    ) {
+    }
+
+    public function url(string $imageFilename, string $name): string
+    {
+        return $imageFilename !== ''
+            ? $this->imagesBasePath.'/'.$imageFilename
+            : $this->placeholderImage($name);
+    }
 
     private function placeholderImage(string $name): string
     {

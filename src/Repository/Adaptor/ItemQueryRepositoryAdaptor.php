@@ -11,14 +11,14 @@ use App\Domain\Item\ItemStatus;
 use App\Entity\Item;
 use App\Repository\ItemRepository;
 use App\Repository\UserRepository;
+use App\Service\Image\ItemImageResolver;
 
 final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
 {
     public function __construct(
         private readonly ItemRepository    $items,
         private readonly UserRepository    $users,
-        private readonly string $projectDir,
-        private readonly string $imagesBasePath,
+        private readonly ItemImageResolver $imageResolver,
     ) {
     }
 
@@ -32,7 +32,7 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
                 name: $record->name,
                 status: $record->status,
                 description: $record->description,
-                imageUrl: $this->imageUrl($record),
+                imageUrl: $this->imageResolver->url($record->imageFilename, $record->name),
             ),
             $this->items->findByUserId($userId),
         );
@@ -56,16 +56,11 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
                 name: $record->name,
                 status: $record->status,
                 description: $record->description,
-                imageUrl: $this->imageUrl($record),
+                imageUrl: $this->imageResolver->url($record->imageFilename, $record->name),
                 userId: $record->userId,
                 contactInfo: $contactInfoByUserId[$record->userId] ?? 'Unknown',
             ),
             $records,
         );
-    }
-
-    private function imageUrl(Item $record): string
-    {
-        return $this->imagesBasePath.'/'.$record->imageFilename;
     }
 }
