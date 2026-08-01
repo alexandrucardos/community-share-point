@@ -23,20 +23,29 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
 
     public function add(ItemEntity $item): void
     {
+        $record = $this->toRecord($item);
+
         if($item->isContainsFile() === true) {
             $this->imageUploader->upload($item);
+            $record->imageFilename = $item->getFileName();
         }
 
-        $this->records->save($this->toRecord($item));
+        $this->records->save($record);
     }
 
     public function update(ItemEntity $item): void
     {
+        $record = $this->toRecord($item);
+
         if($item->isContainsFile() === true) {
             $this->imageUploader->upload($item);
         }
 
-        $this->records->save($this->toRecord($item));
+        // Preserve the existing image when no new file is uploaded; the entity
+        // loaded via findById() always carries its stored filename.
+        $record->imageFilename = $item->getFileName();
+
+        $this->records->save($record);
     }
 
     public function findById(string $id): ?ItemEntity
@@ -55,9 +64,6 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
         $record->description = $item->getDescription();
         $record->status = $item->getStatus();
 
-        if($item->isContainsFile() === true) {
-            $record->imageFilename = $item->getFileName();
-        }
         return $record;
     }
 
