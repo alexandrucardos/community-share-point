@@ -4,21 +4,30 @@ declare(strict_types=1);
 
 namespace App\Service\Image;
 
-
 final class ItemImageResolver
 {
     private const COLOR_PALETTE = ['2563eb', 'db2777', 'ea580c', '65a30d', '7c3aed', '0891b2'];
 
     public function __construct(
-        private readonly string $imagesBasePath,
+        private readonly string $awsS3Bucket,
+        private readonly string $awsRegion,
+        private readonly string $awsS3KeyPrefix,
     ) {
     }
 
     public function url(string $imageFilename, string $name): string
     {
-        return $imageFilename !== ''
-            ? $this->imagesBasePath.'/'.$imageFilename
-            : $this->placeholderImage($name);
+        if ($imageFilename === '') {
+            return $this->placeholderImage($name);
+        }
+
+        return sprintf(
+            'https://%s.s3.%s.amazonaws.com/%s/%s',
+            $this->awsS3Bucket,
+            $this->awsRegion,
+            trim($this->awsS3KeyPrefix, '/'),
+            $imageFilename,
+        );
     }
 
     private function placeholderImage(string $name): string

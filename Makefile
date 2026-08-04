@@ -1,5 +1,5 @@
 PROJECT_NAME := comunity-share-point
-ZIP_NAME := $(PROJECT_NAME)-v4.zip
+ZIP_NAME := $(PROJECT_NAME)-v5.zip
 
 all: install assets zip
 

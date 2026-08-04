@@ -1,4 +1,7 @@
 {
+    "async-aws/async-aws-bundle": {
+        "version": "1.15.0"
+    },
     "doctrine/deprecations": {
         "version": "1.1",
         "recipe": {

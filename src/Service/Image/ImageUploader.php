@@ -6,12 +6,14 @@ namespace App\Service\Image;
 
 use App\Domain\Item\FileExtension;
 use App\Domain\Item\ItemEntity;
+use AsyncAws\S3\S3Client;
 
 final class ImageUploader
 {
     public function __construct(
-        private readonly string $projectDir,
-        private readonly string $imagesBasePath,
+        private readonly S3Client $s3,
+        private readonly string $awsS3Bucket,
+        private readonly string $awsS3KeyPrefix,
     ) {
     }
 
@@ -19,12 +21,6 @@ final class ImageUploader
         ItemEntity $item
     ): void
     {
-        $directory = $this->projectDir.'/public/images/items';
-
-        if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) {
-            throw new \RuntimeException(sprintf('Unable to create directory "%s".', $directory));
-        }
-
         $this->encode($item);
     }
 
@@ -51,17 +47,8 @@ final class ImageUploader
             imagealphablending($thumbnail, false);
             imagesavealpha($thumbnail, true);
 
-
-            $directory = $this->projectDir.'/public'.$this->imagesBasePath;
-            $target = $directory.'/'.$item->getFileName();
-
             try {
-                $encoded = match ($item->getFileExtension()) {
-                    FileExtension::jpg, FileExtension::jpeg => imagejpeg($thumbnail, $target, 85),
-                    FileExtension::png => imagepng($thumbnail, $target),
-                    FileExtension::gif => imagegif($thumbnail, $target),
-                    FileExtension::webp => imagewebp($thumbnail, $target, 85),
-                };
+                $body = $this->render($thumbnail, $item->getFileExtension());
             } finally {
                 if ($thumbnail !== $image) {
                     imagedestroy($thumbnail);
@@ -71,9 +58,50 @@ final class ImageUploader
             imagedestroy($image);
         }
 
-        if (false === $encoded) {
+        $this->s3->putObject([
+            'Bucket' => $this->awsS3Bucket,
+            'Key' => $this->key($item->getFileName()),
+            'Body' => $body,
+            'ContentType' => $this->contentType($item->getFileExtension()),
+        ])->resolve();
+    }
+
+    /**
+     * Encode the GD image into the target format and return the raw bytes.
+     */
+    private function render(\GdImage $thumbnail, FileExtension $extension): string
+    {
+        ob_start();
+
+        $encoded = match ($extension) {
+            FileExtension::jpg, FileExtension::jpeg => imagejpeg($thumbnail, null, 85),
+            FileExtension::png => imagepng($thumbnail),
+            FileExtension::gif => imagegif($thumbnail),
+            FileExtension::webp => imagewebp($thumbnail, null, 85),
+        };
+
+        $body = ob_get_clean();
+
+        if (false === $encoded || false === $body || '' === $body) {
             throw new \RuntimeException('Unable to encode the uploaded image.');
         }
+
+        return $body;
+    }
+
+    private function key(string $fileName): string
+    {
+        return trim($this->awsS3KeyPrefix, '/').'/'.$fileName;
+    }
+
+    private function contentType(FileExtension $extension): string
+    {
+        return match ($extension) {
+            FileExtension::jpg, FileExtension::jpeg => 'image/jpeg',
+            FileExtension::png => 'image/png',
+            FileExtension::gif => 'image/gif',
+            FileExtension::webp => 'image/webp',
+        };
     }
 
     private function resize(\GdImage $image, int $maxFileSize): \GdImage

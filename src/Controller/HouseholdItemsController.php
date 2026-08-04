@@ -19,7 +19,7 @@ use App\Domain\Item\Exception\ItemNotFoundException;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\Item\ItemStatus;
 use App\Domain\ValueObject\FileValueObject;
-use App\Service\Image\ImageUploader;
+use App\Service\Image\ItemImageResolver;
 use App\Service\Security\SecurityUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -118,7 +118,7 @@ final class HouseholdItemsController extends AbstractController
     }
 
     #[Route('/items/{id}/edit', name: 'household_items_edit', methods: ['GET', 'POST'])]
-    public function edit(string $uuid, Request $request, string $id, ItemRepositoryInterface $itemRepository, UpdateItemHandler $updateItemHandler, ImageUploader $imageUploader): Response
+    public function edit(string $uuid, Request $request, string $id, ItemRepositoryInterface $itemRepository, UpdateItemHandler $updateItemHandler, ItemImageResolver $imageResolver): Response
     {
         $this->assertGroup($uuid);
 
@@ -132,8 +132,7 @@ final class HouseholdItemsController extends AbstractController
         $name = $item->getName();
         $description = $item->getDescription();
         $status = $item->getStatus();
-        //todo add url dynamic
-        $currentImageUrl = '';
+        $currentImageUrl = $imageResolver->url($item->getFileName(), $item->getName());
 
         if ($request->isMethod('POST')) {
             $name = (string) $request->request->get('name', '');
