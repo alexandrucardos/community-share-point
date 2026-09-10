@@ -29,7 +29,26 @@ RedirectMatch 404 ^/(app|src|config|var|vendor|translations|tests|templates|migr
 # ----------------------------------------------------------------------
 RewriteEngine On
 
+# Serve real files that physically exist inside public/
+# (compiled assets under /assets, images, favicon, etc.)
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+RewriteRule ^(.+)$ public/$1 [L]
+
 # Only route to public/index.php if not a real file or directory
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ public/index.php [L]
+
+# ----------------------------------------------------------------------
+# Security hardening
+# ----------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Disable directory listing
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>

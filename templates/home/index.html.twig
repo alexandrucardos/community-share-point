@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>{{ 'Community Share Point — Coming Soon'|trans }}</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: #f4f6f8;
+            color: #1c2530;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            line-height: 1.6;
+        }
+        .wip__card {
+            max-width: 30rem;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+        .wip__emoji { font-size: 3rem; line-height: 1; }
+        .wip__tag {
+            display: inline-block;
+            margin: 1rem 0 1.25rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #2f855a;
+            border: 1px solid #2f855a;
+            border-radius: 999px;
+        }
+        .wip__title { font-size: 1.6rem; margin: 0 0 0.5rem; }
+        .wip__card p { color: #5b6672; margin: 0.5rem 0; }
+        .wip__footer { margin-top: 1.5rem; font-size: 0.85rem; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <main class="wip__card">
+        <div class="wip__emoji">🛠️</div>
+        <span class="wip__tag">{{ 'Work in progress'|trans }}</span>
+        <h1 class="wip__title">{{ 'Community Share Point'|trans }}</h1>
+        <p>{{ "We're building a place for neighbours to lend and borrow items within their community."|trans }}</p>
+        <p>{{ 'The site is still under construction — please check back soon.'|trans }}</p>
+        <p class="wip__footer">{{ 'Thanks for your patience.'|trans }}</p>
+    </main>
+</body>
+</html>
