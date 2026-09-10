@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Service\ValidationService;
 
-use App\Domain\DTO\ConstraintDto;
+use App\Domain\ValueObject\DTO\ConstraintDto;
 use App\Domain\ValueObject\Constraint;
 use App\Service\ValidationService\ValidatorService;
 use PHPUnit\Framework\TestCase;

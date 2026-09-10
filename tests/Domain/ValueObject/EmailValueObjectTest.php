@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Domain\ValueObject;
 
-use App\Domain\DTO\ConstraintDto;
+use App\Domain\ValueObject\DTO\ConstraintDto;
 use App\Domain\ValueObject\Constraint;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\ValidatorInterface;
-use App\Service\ValidationService\ValidatorService;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 final class EmailValueObjectTest extends TestCase
 {

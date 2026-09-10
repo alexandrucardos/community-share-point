@@ -8,36 +8,45 @@ use App\Domain\User\UserEntity;
 use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
-use App\Repository\Adaptor\DoctrineUserRepository;
-use App\Repository\Doctrine\Entity\UserRecord;
-use App\Repository\Doctrine\UserRecordRepository;
+use App\Entity\User;
+use App\Repository\Adaptor\UserRepositoryAdaptor;
+use App\Repository\UserRepository;
 use App\Service\ValidationService\ValidatorService;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\Translator;
 
 /**
- * Drives the adaptor against a real (in-memory) Doctrine ORM stack so the
- * UserRecord mapping and the Record <-> domain translation are both exercised.
+ * Drives the domain-facing adaptor against a real (in-memory) Doctrine ORM
+ * stack so the User record mapping and the Record <-> domain translation are
+ * both exercised.
  */
-final class DoctrineUserRepositoryTest extends TestCase
+final class UserRepositoryAdaptorTest extends TestCase
 {
     private const GROUP_ID = '94926cac-00e0-4e5f-8633-87b9918a90e4';
 
-    private DoctrineUserRepository $repository;
+    private UserRepositoryAdaptor $repository;
     private ValidatorService $validator;
+    private Stub&ManagerRegistry $registry;
 
     protected function setUp(): void
     {
         $this->validator = new ValidatorService($this->createTranslator());
 
+        if (!Type::hasType('uuid')) {
+            Type::addType('uuid', UuidType::class);
+        }
+
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            [dirname(__DIR__, 3).'/src/Repository/Doctrine/Entity'],
+            [dirname(__DIR__, 3).'/src/Entity'],
             isDevMode: true,
         );
         $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true], $config);
@@ -46,16 +55,16 @@ final class DoctrineUserRepositoryTest extends TestCase
         $schemaTool = new SchemaTool($entityManager);
         $schemaTool->createSchema($entityManager->getMetadataFactory()->getAllMetadata());
 
-        $registry = $this->createStub(ManagerRegistry::class);
-        $registry->method('getManagerForClass')->willReturn($entityManager);
+        $this->registry = $this->createStub(ManagerRegistry::class);
+        $this->registry->method('getManagerForClass')->willReturn($entityManager);
 
-        $this->repository = new DoctrineUserRepository(
-            new UserRecordRepository($registry),
+        $this->repository = new UserRepositoryAdaptor(
+            new UserRepository($this->registry),
             $this->validator,
         );
     }
 
-    public function testFindByEmailReturnsNullWhenNoUserWasStored(): void
+    public function testFindByEmailAndGroupIdReturnsNullWhenNoUserWasStored(): void
     {
         $found = $this->repository->findByEmailAndGroupId(
             $this->email('missing@example.com'),
@@ -65,7 +74,7 @@ final class DoctrineUserRepositoryTest extends TestCase
         self::assertNull($found);
     }
 
-    public function testAddThenFindByEmailReturnsTheStoredUser(): void
+    public function testAddThenFindByEmailAndGroupIdReturnsTheStoredUser(): void
     {
         $this->repository->add($this->buildUser('11111111-1111-4111-8111-111111111111', 'jane.doe@example.com'));
 
@@ -82,6 +91,18 @@ final class DoctrineUserRepositoryTest extends TestCase
         self::assertSame(self::GROUP_ID, $found->getGroupId()->value);
     }
 
+    public function testFindByEmailAndGroupIdDoesNotReturnUsersFromAnotherGroup(): void
+    {
+        $this->repository->add($this->buildUser('11111111-1111-4111-8111-111111111111', 'jane.doe@example.com'));
+
+        $found = $this->repository->findByEmailAndGroupId(
+            $this->email('jane.doe@example.com'),
+            $this->uuid('aaaaaaaa-1111-4111-8111-111111111111'),
+        );
+
+        self::assertNull($found);
+    }
+
     public function testUpdateOverwritesTheExistingRow(): void
     {
         $id = '22222222-2222-4222-8222-222222222222';
@@ -94,7 +115,38 @@ final class DoctrineUserRepositoryTest extends TestCase
             $this->uuid(self::GROUP_ID),
         );
         self::assertNotNull($reloaded);
+        self::assertSame($id, $reloaded->getId()->value);
         self::assertSame('after@example.com', $reloaded->getEmail()->value);
+    }
+
+    public function testUpdateDoesNotDuplicateRows(): void
+    {
+        $id = '22222222-2222-4222-8222-222222222222';
+
+        $this->repository->add($this->buildUser($id, 'same@example.com'));
+        $this->repository->update($this->buildUser($id, 'same@example.com'));
+
+        $reloaded = $this->repository->findByEmailAndGroupId(
+            $this->email('same@example.com'),
+            $this->uuid(self::GROUP_ID),
+        );
+        self::assertNotNull($reloaded);
+        self::assertSame($id, $reloaded->getId()->value);
+    }
+
+    public function testAddPersistsTheRecordWithTheExpectedFieldValues(): void
+    {
+        $entityManager = $this->registry->getManagerForClass(User::class);
+
+        $this->repository->add($this->buildUser('33333333-3333-4333-8333-333333333333', 'persisted@example.com'));
+
+        /** @var User|null $record */
+        $record = $entityManager->find(User::class, '33333333-3333-4333-8333-333333333333');
+        self::assertNotNull($record);
+        self::assertSame('persisted@example.com', $record->email);
+        self::assertSame('hashed-password', $record->password);
+        self::assertSame('+40 700 000 000', $record->contactInfo);
+        self::assertSame(self::GROUP_ID, $record->groupId);
     }
 
     private function buildUser(string $id, string $email): UserEntity
