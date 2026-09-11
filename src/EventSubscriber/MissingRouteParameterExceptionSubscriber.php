@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Routing;
+namespace App\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
