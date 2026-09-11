@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Request Log{% endblock %}
+
+{% block body %}
+    <main class="request-log">
+        <div class="request-log__header">
+            <h1>{{ 'Request / Response Log'|trans }}</h1>
+            <p>{{ '%total% entries, page %page%'|trans({'%total%': total, '%page%': page}) }}</p>
+        </div>
+
+        {% if entries is empty %}
+            <p class="request-log__empty">{{ 'No log entries yet.'|trans }}</p>
+        {% else %}
+            <table class="request-log__table">
+                <thead>
+                    <tr>
+                        <th>{{ 'Time'|trans }}</th>
+                        <th>{{ 'Type'|trans }}</th>
+                        <th>{{ 'Method'|trans }}</th>
+                        <th>{{ 'Route'|trans }}</th>
+                        <th>{{ 'URI'|trans }}</th>
+                        <th>{{ 'Status'|trans }}</th>
+                        <th>{{ 'Duration'|trans }}</th>
+                        <th>{{ 'Payload'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                        <tr>
+                            <td>{{ entry.timestamp|date('H:i:s') }}</td>
+                            <td>
+                                <span class="request-log__type request-log__type--{{ entry.type }}">
+                                    {{ entry.type }}
+                                </span>
+                            </td>
+                            <td>{{ entry.method }}</td>
+                            <td>{{ entry.route ?? '—' }}</td>
+                            <td class="request-log__uri">{{ entry.uri }}</td>
+                            <td>
+                                {% if entry.status is not null %}
+                                    <span class="request-log__status request-log__status--{{ entry.status >= 400 ? 'error' : (entry.status >= 300 ? 'redirect' : 'ok') }}">
+                                        {{ entry.status }}
+                                    </span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>{% if entry.durationMs is not null %}{{ entry.durationMs }} ms{% else %}—{% endif %}</td>
+                            <td>
+                                {% if entry.type == 'request' %}
+                                    <details>
+                                        <summary>{{ entry.payload|length }} field(s)</summary>
+                                        <pre>{{ entry.payload|json_encode(128 b-or 64) }}</pre>
+                                    </details>
+                                {% elseif entry.contentType %}
+                                    {{ entry.contentType }}
+                                {% else %}—{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% set totalPages = (total / pageSize)|round(0, 'ceil') %}
+            {% if totalPages > 1 %}
+                <nav class="request-log__pagination">
+                    {% if page > 1 %}
+                        <a href="{{ path('request_response_log', {'page': page - 1}) }}">&laquo; {{ 'Newer'|trans }}</a>
+                    {% endif %}
+                    <span>{{ 'Page %page% of %pages%'|trans({'%page%': page, '%pages%': totalPages}) }}</span>
+                    {% if page < totalPages %}
+                        <a href="{{ path('request_response_log', {'page': page + 1}) }}">{{ 'Older'|trans }} &raquo;</a>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        {% endif %}
+    </main>
+{% endblock %}
