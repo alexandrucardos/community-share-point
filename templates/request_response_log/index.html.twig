@@ -8,7 +8,7 @@
             <h1>{{ 'Request / Response Log'|trans }}</h1>
             <p>
                 {{ '%total% entries'|trans({'%total%': pagination.getTotalItemCount}) }}
-                {% if not filter.isEmpty() %}· {{ 'filtered'|trans }}{% endif %}
+                {% if not filter.isEmpty() %}<span class="request-log__filtered">{{ 'filtered'|trans }}</span>{% endif %}
             </p>
         </div>
 
@@ -57,55 +57,64 @@
         </form>
 
         {% if pagination is empty %}
-            <p class="request-log__empty">{{ 'No log entries yet.'|trans }}</p>
+            <div class="request-log__empty">
+                <span class="request-log__empty-icon" aria-hidden="true">🗒️</span>
+                <p>{{ 'No log entries match the current filters.'|trans }}</p>
+            </div>
         {% else %}
-            <table class="request-log__table">
-                <thead>
-                    <tr>
-                        <th>{{ 'Time'|trans }}</th>
-                        <th>{{ 'Type'|trans }}</th>
-                        <th>{{ 'Method'|trans }}</th>
-                        <th>{{ 'Route'|trans }}</th>
-                        <th>{{ 'URI'|trans }}</th>
-                        <th>{{ 'Status'|trans }}</th>
-                        <th>{{ 'Duration'|trans }}</th>
-                        <th>{{ 'Payload'|trans }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in pagination %}
+            <div class="request-log__table-wrap">
+                <table class="request-log__table">
+                    <thead>
                         <tr>
-                            <td>{{ entry.timestamp|date('H:i:s') }}</td>
-                            <td>
-                                <span class="request-log__type request-log__type--{{ entry.type }}">
-                                    {{ entry.type }}
-                                </span>
-                            </td>
-                            <td>{{ entry.method }}</td>
-                            <td>{{ entry.route ?? '—' }}</td>
-                            <td class="request-log__uri">{{ entry.uri }}</td>
-                            <td>
-                                {% if entry.status is not null %}
-                                    <span class="request-log__status request-log__status--{{ entry.status >= 400 ? 'error' : (entry.status >= 300 ? 'redirect' : 'ok') }}">
-                                        {{ entry.status }}
-                                    </span>
-                                {% else %}—{% endif %}
-                            </td>
-                            <td>{% if entry.durationMs is not null %}{{ entry.durationMs }} ms{% else %}—{% endif %}</td>
-                            <td>
-                                {% if entry.type == 'request' %}
-                                    <details>
-                                        <summary>{{ entry.payload|length }} field(s)</summary>
-                                        <pre>{{ entry.payload|json_encode(128 b-or 64) }}</pre>
-                                    </details>
-                                {% elseif entry.contentType %}
-                                    {{ entry.contentType }}
-                                {% else %}—{% endif %}
-                            </td>
+                            <th>{{ 'Time'|trans }}</th>
+                            <th>{{ 'Type'|trans }}</th>
+                            <th>{{ 'Method'|trans }}</th>
+                            <th>{{ 'URI'|trans }}</th>
+                            <th>{{ 'Status'|trans }}</th>
+                            <th>{{ 'Duration'|trans }}</th>
+                            <th>{{ 'Payload'|trans }}</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for entry in pagination %}
+                            <tr class="request-log__row request-log__row--{{ entry.type }}">
+                                <td class="request-log__time">{{ entry.timestamp|date('d M H:i:s') }}</td>
+                                <td>
+                                    <span class="request-log__type request-log__type--{{ entry.type }}">{{ entry.type }}</span>
+                                </td>
+                                <td>
+                                    {% if entry.method %}
+                                        <span class="request-log__method request-log__method--{{ entry.method|lower }}">{{ entry.method }}</span>
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td class="request-log__uri-cell">
+                                    <span class="request-log__uri">{{ entry.uri }}</span>
+                                    {% if entry.route %}<span class="request-log__route">{{ entry.route }}</span>{% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.status is not null %}
+                                        <span class="request-log__status request-log__status--{{ entry.status >= 500 ? 'server-error' : (entry.status >= 400 ? 'error' : (entry.status >= 300 ? 'redirect' : 'ok')) }}">{{ entry.status }}</span>
+                                    {% else %}—{% endif %}
+                                    {% if entry.contentType %}<div class="request-log__content-type">{{ entry.contentType }}</div>{% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.durationMs is not null %}
+                                        <span class="request-log__duration{{ entry.durationMs > 1000 ? ' request-log__duration--slow' : (entry.durationMs > 300 ? ' request-log__duration--warn' : '') }}">{{ entry.durationMs }} ms</span>
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.type == 'request' %}
+                                        <details class="request-log__payload">
+                                            <summary>{{ entry.payload|length }} field(s)</summary>
+                                            <pre>{{ entry.payload|json_encode(128 b-or 64) }}</pre>
+                                        </details>
+                                    {% else %}—{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
             <nav class="request-log__pagination">
                 {{ knp_pagination_render(pagination) }}
