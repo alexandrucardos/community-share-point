@@ -51,4 +51,20 @@ final class EmailValueObjectTest extends TestCase
 
         self::assertSame($value, $emailValueObject->value);
     }
+
+    public function testSerializeRoundTripPreservesValue(): void
+    {
+        $value = 'john.doe@example.com';
+
+        $validator = $this->createMock(ValidatorInterface::class);
+
+        $emailValueObject = new EmailValueObject($validator);
+        $emailValueObject($value);
+
+        $serialized = serialize($emailValueObject);
+        $unserialized = unserialize($serialized);
+
+        self::assertInstanceOf(EmailValueObject::class, $unserialized);
+        self::assertSame($value, $unserialized->value);
+    }
 }
