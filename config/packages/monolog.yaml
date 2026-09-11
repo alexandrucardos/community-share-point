@@ -1,0 +1,72 @@
+monolog:
+    channels: # To see all channels, run bin/console debug:autowiring logger
+        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - request_payload
+
+when@dev:
+    monolog:
+        handlers:
+            main:
+                type: rotating_file
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+                max_files: 30
+                channels: ["!event"]
+            console:
+                type: console
+                process_psr_3_messages: false
+                channels: ["!event", "!doctrine", "!console"]
+            request_payload:
+                type: rotating_file
+                path: "%kernel.logs_dir%/payload.log"
+                level: info
+                max_files: 30
+                channels: [request_payload]
+
+when@test:
+    monolog:
+        handlers:
+            main:
+                type: fingers_crossed
+                action_level: error
+                handler: nested
+                excluded_http_codes: [404, 405]
+                channels: ["!event"]
+            nested:
+                type: rotating_file
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+                max_files: 30
+
+when@prod:
+    monolog:
+        handlers:
+            main:
+                type: fingers_crossed
+                action_level: error
+                handler: nested
+                excluded_http_codes: [404, 405]
+                channels: ["!deprecation", "!request_payload"]
+                buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+            nested:
+                type: rotating_file
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+                max_files: 30
+                formatter: monolog.formatter.json
+            console:
+                type: console
+                process_psr_3_messages: false
+                channels: ["!event", "!doctrine"]
+            deprecation:
+                type: stream
+                channels: [deprecation]
+                path: php://stderr
+                formatter: monolog.formatter.json
+            request_payload:
+                type: rotating_file
+                path: "%kernel.logs_dir%/payload.log"
+                level: info
+                max_files: 30
+                formatter: monolog.formatter.json
+                channels: [request_payload]
