@@ -46,7 +46,7 @@ final class RequestPayloadSubscriber implements EventSubscriberInterface
             $request->getPayload()->all(),
         );
 
-        $this->requestPayloadLogger->info('Request payload.', [
+        $this->requestPayloadLogger->info('Request.', [
             'method' => $request->getMethod(),
             'route' => $request->attributes->get('_route'),
             'uri' => $request->getRequestUri(),
