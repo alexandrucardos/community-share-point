@@ -6,10 +6,57 @@
     <main class="request-log">
         <div class="request-log__header">
             <h1>{{ 'Request / Response Log'|trans }}</h1>
-            <p>{{ '%total% entries, page %page%'|trans({'%total%': total, '%page%': page}) }}</p>
+            <p>
+                {{ '%total% entries'|trans({'%total%': pagination.getTotalItemCount}) }}
+                {% if not filter.isEmpty() %}· {{ 'filtered'|trans }}{% endif %}
+            </p>
         </div>
 
-        {% if entries is empty %}
+        <form method="get" action="{{ path('request_response_log') }}" class="request-log__filters">
+            <div class="request-log__filters-grid">
+                <label>
+                    <span>{{ 'Type'|trans }}</span>
+                    <select name="type">
+                        <option value="">{{ 'Any'|trans }}</option>
+                        {% for type in types %}
+                            <option value="{{ type }}"{{ filter.type == type ? ' selected' : '' }}>{{ type|trans }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>
+                    <span>{{ 'Method'|trans }}</span>
+                    <select name="method">
+                        <option value="">{{ 'Any'|trans }}</option>
+                        {% for httpMethod in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] %}
+                            <option value="{{ httpMethod }}"{{ filter.method == httpMethod ? ' selected' : '' }}>{{ httpMethod }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>
+                    <span>{{ 'Route'|trans }}</span>
+                    <input type="text" name="route" value="{{ filter.route ?? '' }}" placeholder="app_login">
+                </label>
+
+                <label>
+                    <span>{{ 'Status'|trans }}</span>
+                    <input type="number" name="status" value="{{ filter.status ?? '' }}" min="100" max="599" placeholder="404">
+                </label>
+
+                <label class="request-log__filters-search">
+                    <span>{{ 'Search'|trans }}</span>
+                    <input type="search" name="search" value="{{ filter.search ?? '' }}" placeholder="{{ 'URI or payload value'|trans }}">
+                </label>
+            </div>
+
+            <div class="request-log__filters-actions">
+                <button type="submit" class="button">{{ 'Filter'|trans }}</button>
+                <a href="{{ path('request_response_log') }}" class="request-log__filters-reset">{{ 'Reset'|trans }}</a>
+            </div>
+        </form>
+
+        {% if pagination is empty %}
             <p class="request-log__empty">{{ 'No log entries yet.'|trans }}</p>
         {% else %}
             <table class="request-log__table">
@@ -26,7 +73,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for entry in entries %}
+                    {% for entry in pagination %}
                         <tr>
                             <td>{{ entry.timestamp|date('H:i:s') }}</td>
                             <td>
@@ -60,18 +107,9 @@
                 </tbody>
             </table>
 
-            {% set totalPages = (total / pageSize)|round(0, 'ceil') %}
-            {% if totalPages > 1 %}
-                <nav class="request-log__pagination">
-                    {% if page > 1 %}
-                        <a href="{{ path('request_response_log', {'page': page - 1}) }}">&laquo; {{ 'Newer'|trans }}</a>
-                    {% endif %}
-                    <span>{{ 'Page %page% of %pages%'|trans({'%page%': page, '%pages%': totalPages}) }}</span>
-                    {% if page < totalPages %}
-                        <a href="{{ path('request_response_log', {'page': page + 1}) }}">{{ 'Older'|trans }} &raquo;</a>
-                    {% endif %}
-                </nav>
-            {% endif %}
+            <nav class="request-log__pagination">
+                {{ knp_pagination_render(pagination) }}
+            </nav>
         {% endif %}
     </main>
 {% endblock %}

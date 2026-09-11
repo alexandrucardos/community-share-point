@@ -25,6 +25,14 @@ final class PayloadLogFileReader
      */
     public function readAll(): array
     {
+        return $this->read(new RequestLogFilter());
+    }
+
+    /**
+     * @return RequestLogEntry[] newest entries first, matching the filter
+     */
+    public function read(RequestLogFilter $filter): array
+    {
         $entries = [];
 
         foreach (glob($this->logsDir.'/'.self::LOG_FILE_PATTERN) ?: [] as $file) {
@@ -47,7 +55,66 @@ final class PayloadLogFileReader
 
         usort($entries, static fn (RequestLogEntry $a, RequestLogEntry $b): int => $b->timestamp <=> $a->timestamp);
 
-        return $entries;
+        if ($filter->isEmpty()) {
+            return $entries;
+        }
+
+        return array_values(array_filter(
+            $entries,
+            static fn (RequestLogEntry $entry): bool => self::matches($entry, $filter),
+        ));
+    }
+
+    private static function matches(RequestLogEntry $entry, RequestLogFilter $filter): bool
+    {
+        if ($filter->type !== null && $entry->type !== $filter->type) {
+            return false;
+        }
+
+        if ($filter->method !== null && strcasecmp($entry->method, $filter->method) !== 0) {
+            return false;
+        }
+
+        if ($filter->route !== null
+            && ($entry->route === null || stripos($entry->route, $filter->route) === false)) {
+            return false;
+        }
+
+        if ($filter->status !== null) {
+            // A request line is excluded by a status filter, unless its
+            // paired response has been seen at the same second.
+            if ($entry->type === 'response') {
+                if ($entry->status !== $filter->status) {
+                    return false;
+                }
+            } elseif ($entry->status !== null && $entry->status !== $filter->status) {
+                return false;
+            }
+        }
+
+        if ($filter->search !== null) {
+            $haystacks = [$entry->uri, $entry->route];
+            foreach ($entry->payload as $value) {
+                if (is_scalar($value)) {
+                    $haystacks[] = (string) $value;
+                }
+            }
+
+            $needle = mb_strtolower($filter->search);
+            $found = false;
+            foreach ($haystacks as $haystack) {
+                if ($haystack !== null && mb_stripos($haystack, $needle) !== false) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function parseLine(string $line): ?RequestLogEntry
