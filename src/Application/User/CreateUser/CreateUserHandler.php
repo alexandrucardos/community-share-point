@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\User\CreateUser;
 
+use App\Domain\Event\DomainEventPublisherInterface;
+use App\Domain\User\Event\UserCreatedEvent;
 use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
 use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserEntity;
@@ -22,6 +24,7 @@ final class CreateUserHandler
         private readonly PasswordHasherInterface $passwordHasher,
         private readonly ValidatorInterface $validator,
         private readonly UuidInterface $uuid,
+        private readonly DomainEventPublisherInterface $domainEventPublisher,
     ) {
     }
 
@@ -47,5 +50,12 @@ final class CreateUserHandler
         $user->setGroupId($groupIdVO);
 
         $this->userRepository->add($user);
+
+        $this->domainEventPublisher->publish(new UserCreatedEvent(
+            userId: $user->getId()->value,
+            email: $user->getEmail()->value,
+            contactInfo: $user->getContactInfo()->value,
+            groupId: $user->getGroupId()->value,
+        ));
     }
 }

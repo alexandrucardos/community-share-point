@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\Item\CreateItem;
 
+use App\Domain\Event\DomainEventPublisherInterface;
+use App\Domain\Item\Event\ItemCreatedEvent;
 use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\UuidInterface;
@@ -20,7 +22,8 @@ final class CreateItemHandler
         private readonly ItemDescriptionValueObject $descriptionValidator,
         private readonly UuidInterface $uuid,
         private readonly UuidValueObject $uuidValueObject,
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        private readonly DomainEventPublisherInterface $domainEventPublisher,
     ) {
     }
 
@@ -46,5 +49,14 @@ final class CreateItemHandler
         }
 
         $this->itemRepository->add($item);
+
+        $this->domainEventPublisher->publish(new ItemCreatedEvent(
+            itemId: $item->getId()->value,
+            userId: $item->getUserId()->value,
+            name: $item->getName(),
+            description: $item->getDescription(),
+            status: $item->getStatus(),
+            imageFilename: $item->isContainsFile() ? $item->getFileName() : null,
+        ));
     }
 }

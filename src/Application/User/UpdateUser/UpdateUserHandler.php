@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\User\UpdateUser;
 
+use App\Domain\Event\DomainEventPublisherInterface;
+use App\Domain\User\Event\UserUpdatedEvent;
 use App\Domain\User\Exception\InvalidCurrentPasswordException;
 use App\Domain\User\Exception\UserNotFoundException;
 use App\Domain\User\PasswordHasherInterface;
@@ -20,6 +22,7 @@ final class UpdateUserHandler
         private readonly UserRepositoryInterface $userRepository,
         private readonly PasswordHasherInterface $passwordHasher,
         private readonly ValidatorInterface $validator,
+        private readonly DomainEventPublisherInterface $domainEventPublisher,
     ) {
     }
 
@@ -51,5 +54,13 @@ final class UpdateUserHandler
         $user->setContactInfo($contactInfoVO);
 
         $this->userRepository->update($user);
+
+        $this->domainEventPublisher->publish(new UserUpdatedEvent(
+            userId: $user->getId()->value,
+            email: $user->getEmail()->value,
+            contactInfo: $user->getContactInfo()->value,
+            groupId: $user->getGroupId()->value,
+            passwordChanged: $command->newPassword !== null,
+        ));
     }
 }

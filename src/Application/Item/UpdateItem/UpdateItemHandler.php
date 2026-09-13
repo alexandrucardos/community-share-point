@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\Item\UpdateItem;
 
+use App\Domain\Event\DomainEventPublisherInterface;
+use App\Domain\Item\Event\ItemUpdatedEvent;
 use App\Domain\Item\Exception\ItemAccessDeniedException;
 use App\Domain\Item\Exception\ItemNotFoundException;
 use App\Domain\Item\ItemRepositoryInterface;
@@ -16,6 +18,7 @@ final class UpdateItemHandler
         private readonly ItemRepositoryInterface $itemRepository,
         private readonly ItemNameValueObject $nameValidator,
         private readonly ItemDescriptionValueObject $descriptionValidator,
+        private readonly DomainEventPublisherInterface $domainEventPublisher,
     ) {
     }
 
@@ -48,5 +51,14 @@ final class UpdateItemHandler
         }
 
         $this->itemRepository->update($item);
+
+        $this->domainEventPublisher->publish(new ItemUpdatedEvent(
+            itemId: $item->getId()->value,
+            userId: $item->getUserId()->value,
+            name: $item->getName(),
+            description: $item->getDescription(),
+            status: $item->getStatus(),
+            imageFilename: $item->getFileName() ?: null,
+        ));
     }
 }
