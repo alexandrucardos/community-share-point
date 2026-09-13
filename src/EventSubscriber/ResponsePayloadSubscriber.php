@@ -26,6 +26,9 @@ final class ResponsePayloadSubscriber implements EventSubscriberInterface
         '_password',
         '_password_confirmation',
         '_csrf_token',
+        'current_password',
+        'new_password',
+        'new_password_confirmation'
     ];
 
     private const DEFAULT_VALUE_FOR_SENSITIVE_KEYS = '***';
