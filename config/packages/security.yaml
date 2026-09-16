@@ -28,6 +28,7 @@ security:
             # switch_user: true
 
     role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
         ROLE_USER: ROLE_GUEST
 
     # Note: Only the *first* matching rule is applied
@@ -38,7 +39,7 @@ security:
         - { path: ^/group/[^/]+/account, roles: ROLE_USER }
         - { path: ^/group/[^/]+/items/group, roles: PUBLIC_ACCESS }
         - { path: ^/group/[^/]+/items, roles: ROLE_USER }
-        - { path: ^/group/[^/]+/request-log, roles: ROLE_GUEST }
+        - { path: ^/group/[^/]+/request-log, roles: ROLE_ADMIN }
 
 when@test:
     security:

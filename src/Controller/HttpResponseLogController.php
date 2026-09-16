@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\RequestLog\DatabaseRequestLogReader;
+use App\Service\RequestLog\PayloadLogFileReader;
 use App\Service\RequestLog\RequestLogFilter;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * Lists request/response log entries from the `request_response_log` database table.
+ * Lists request/response log entries from the Monolog payload log files.
  *
  * Intentionally shows everything (all groups/users) — a diagnostic page,
  * currently open to ROLE_GUEST ("for now", per project decision).
@@ -22,12 +22,13 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class HttpResponseLogController extends AbstractController
 {
     private const PAGE_SIZE = 10;
+    private const DEFAULT_HTTP_CODE = Response::HTTP_INTERNAL_SERVER_ERROR;
 
     #[Route('/group/{uuid}/request-log', name: 'request_response_log', methods: ['GET'], requirements: ['uuid' => GroupRoute::UUID])]
     #[IsGranted('ROLE_GUEST')]
     public function __invoke(
         string $uuid,
-        DatabaseRequestLogReader $reader,
+        PayloadLogFileReader $reader,
         PaginatorInterface $paginator,
         #[MapQueryParameter] string $type = '',
         #[MapQueryParameter] string $method = '',
@@ -40,17 +41,15 @@ final class HttpResponseLogController extends AbstractController
             type: $type !== '' ? $type : null,
             method: $method !== '' ? $method : null,
             route: $route !== '' ? $route : null,
-            status: $status !== '' ? (int) $status : null,
+            status: $status !== '' ? (int) $status : self::DEFAULT_HTTP_CODE,
             search: $search !== '' ? $search : null,
         );
 
-        // The reader pages the log in the database; the paginator is given the
-        // page it already selected, and the real total so the widget and the
-        // header can report it.
-        $page = max(1, $page);
-        $pageResult = $reader->readPage($filter, $page, self::PAGE_SIZE);
-        $pagination = $paginator->paginate($pageResult->entries, $page, self::PAGE_SIZE);
-        $pagination->setTotalItemCount($pageResult->totalItemCount);
+        $pagination = $paginator->paginate(
+            $reader->read($filter),
+            max(1, $page),
+            self::PAGE_SIZE,
+        );
 
         return $this->render('request_response_log/index.html.twig', [
             'pagination' => $pagination,
