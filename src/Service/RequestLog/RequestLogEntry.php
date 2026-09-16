@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Service\RequestLog;
 
 /**
- * A single request/response line pair parsed from the monolog
- * `request_payload` channel log (var/log/payload-YYYY-MM-DD.log).
+ * A request or response entry adapted from the persisted HTTP audit record.
  */
 final class RequestLogEntry
 {
@@ -19,7 +18,7 @@ final class RequestLogEntry
         public readonly ?string $route,
         public readonly string $uri,
         public readonly ?string $ip,
-        /** Raw payload array for 'request' entries; empty for 'response'. */
+        /** Request or response payload data. */
         public readonly array $payload,
         /** HTTP status for 'response' entries; null for 'request'. */
         public readonly ?int $status,
@@ -27,5 +26,27 @@ final class RequestLogEntry
         public readonly ?int $contentLength,
         public readonly ?int $durationMs,
     ) {
+    }
+
+    /**
+     * Same entry with a different payload, used to shorten payloads for display.
+     *
+     * @param array<array-key, mixed> $payload
+     */
+    public function withPayload(array $payload): self
+    {
+        return new self(
+            timestamp: $this->timestamp,
+            type: $this->type,
+            method: $this->method,
+            route: $this->route,
+            uri: $this->uri,
+            ip: $this->ip,
+            payload: $payload,
+            status: $this->status,
+            contentType: $this->contentType,
+            contentLength: $this->contentLength,
+            durationMs: $this->durationMs,
+        );
     }
 }

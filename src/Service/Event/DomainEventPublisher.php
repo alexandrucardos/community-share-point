@@ -23,10 +23,8 @@ final class DomainEventPublisher implements DomainEventPublisherInterface
     ) {
     }
 
-    public function publish(DomainEventInterface ...$events): void
+    public function publish(DomainEventInterface $event): void
     {
-        foreach ($events as $event) {
             $this->dispatcher->dispatch($event, DomainEventInterface::class);
-        }
     }
 }

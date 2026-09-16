@@ -3,13 +3,47 @@
 {% block title %}Request Log{% endblock %}
 
 {% block body %}
+    {% set entries = pagination.items|default([]) %}
+    {% set requestCount = entries|filter(entry => entry.type == 'request')|length %}
+    {% set responseCount = entries|filter(entry => entry.type == 'response')|length %}
+    {% set errorCount = entries|filter(entry => entry.type == 'response' and entry.status is not null and entry.status >= 400)|length %}
+    {% set durations = entries|map(entry => entry.durationMs)|filter(ms => ms is not null) %}
+    {% set longestDuration = durations is not empty ? max(durations) : 0 %}
+
     <main class="request-log">
         <div class="request-log__header">
-            <h1>{{ 'Request / Response Log'|trans }}</h1>
-            <p>
+            <div class="request-log__heading">
+                <h1>{{ 'Request / Response Log'|trans }}</h1>
+                {% if not filter.isEmpty() %}
+                    <span class="request-log__filtered">{{ 'filtered'|trans }}</span>
+                {% endif %}
+            </div>
+
+            <p class="request-log__meta">
                 {{ '%total% entries'|trans({'%total%': pagination.getTotalItemCount}) }}
-                {% if not filter.isEmpty() %}<span class="request-log__filtered">{{ 'filtered'|trans }}</span>{% endif %}
             </p>
+
+            {% if entries is not empty %}
+                <div class="request-log__stats">
+                    <span class="request-log__stat request-log__stat--request">
+                        <span class="request-log__stat-dot" aria-hidden="true"></span>
+                        <span class="request-log__stat-value">{{ requestCount }}</span>
+                        <span class="request-log__stat-label">{{ 'Requests'|trans }}</span>
+                    </span>
+                    <span class="request-log__stat request-log__stat--response">
+                        <span class="request-log__stat-dot" aria-hidden="true"></span>
+                        <span class="request-log__stat-value">{{ responseCount }}</span>
+                        <span class="request-log__stat-label">{{ 'Responses'|trans }}</span>
+                    </span>
+                    {% if errorCount > 0 %}
+                        <span class="request-log__stat request-log__stat--error">
+                            <span class="request-log__stat-dot" aria-hidden="true"></span>
+                            <span class="request-log__stat-value">{{ errorCount }}</span>
+                            <span class="request-log__stat-label">{{ 'Errors'|trans }}</span>
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
 
         <form method="get" action="{{ path('request_response_log') }}" class="request-log__filters">
@@ -76,41 +110,113 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for entry in pagination %}
-                            <tr class="request-log__row request-log__row--{{ entry.type }}">
-                                <td class="request-log__time">{{ entry.timestamp|date('d M H:i:s') }}</td>
-                                <td>
-                                    <span class="request-log__type request-log__type--{{ entry.type }}">{{ entry.type }}</span>
+                        {# Carried across iterations to spot the response that closes the request above it. #}
+                        {% set previousEntry = null %}
+                        {% for entry in entries %}
+                            {% set isPairedResponse = entry.type == 'response'
+                                and previousEntry is not null
+                                and previousEntry.type == 'request'
+                                and previousEntry.timestamp == entry.timestamp
+                                and previousEntry.uri == entry.uri %}
+                            {% set statusTone = entry.status is null ? null : (entry.status >= 500 ? 'server-error' : (entry.status >= 400 ? 'error' : (entry.status >= 300 ? 'redirect' : 'ok'))) %}
+                            {% set durationTone = entry.durationMs is null ? null : (entry.durationMs > 1000 ? 'slow' : (entry.durationMs > 300 ? 'warn' : 'fast')) %}
+
+                            <tr class="request-log__row request-log__row--{{ entry.type }}{{ statusTone ? ' request-log__row--' ~ statusTone : '' }}{{ isPairedResponse ? ' request-log__row--paired' : '' }}">
+                                <td class="request-log__time">
+                                    <span class="request-log__date">{{ entry.timestamp|date('d M') }}</span>
+                                    <span class="request-log__clock">{{ entry.timestamp|date('H:i:s') }}</span>
+                                </td>
+                                <td class="request-log__type-cell">
+                                    {% if isPairedResponse %}<span class="request-log__pair-marker" aria-hidden="true">↳</span>{% endif %}
+                                    <span class="request-log__type request-log__type--{{ entry.type }}">{{ entry.type|trans }}</span>
                                 </td>
                                 <td>
                                     {% if entry.method %}
                                         <span class="request-log__method request-log__method--{{ entry.method|lower }}">{{ entry.method }}</span>
-                                    {% else %}—{% endif %}
+                                    {% else %}
+                                        <span class="request-log__muted">—</span>
+                                    {% endif %}
                                 </td>
                                 <td class="request-log__uri-cell">
-                                    <span class="request-log__uri">{{ entry.uri }}</span>
-                                    {% if entry.route %}<span class="request-log__route">{{ entry.route }}</span>{% endif %}
+                                    <span class="request-log__uri" title="{{ entry.uri }}">{{ entry.uri }}</span>
+                                    {% if entry.route or entry.ip %}
+                                        <span class="request-log__sub">
+                                            {%- if entry.route %}<span class="request-log__route">{{ entry.route }}</span>{% endif -%}
+                                            {%- if entry.route and entry.ip %}<span class="request-log__sub-sep" aria-hidden="true">·</span>{% endif -%}
+                                            {%- if entry.ip %}<span class="request-log__ip">{{ entry.ip }}</span>{% endif -%}
+                                        </span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if entry.status is not null %}
-                                        <span class="request-log__status request-log__status--{{ entry.status >= 500 ? 'server-error' : (entry.status >= 400 ? 'error' : (entry.status >= 300 ? 'redirect' : 'ok')) }}">{{ entry.status }}</span>
-                                    {% else %}—{% endif %}
-                                    {% if entry.contentType %}<div class="request-log__content-type">{{ entry.contentType }}</div>{% endif %}
+                                        <span class="request-log__status request-log__status--{{ statusTone }}">{{ entry.status }}</span>
+                                    {% else %}
+                                        <span class="request-log__muted">—</span>
+                                    {% endif %}
+                                    {% if entry.contentType %}
+                                        <span class="request-log__content-type">{{ entry.contentType }}</span>
+                                    {% endif %}
                                 </td>
-                                <td>
+                                <td class="request-log__duration-cell">
                                     {% if entry.durationMs is not null %}
-                                        <span class="request-log__duration{{ entry.durationMs > 1000 ? ' request-log__duration--slow' : (entry.durationMs > 300 ? ' request-log__duration--warn' : '') }}">{{ entry.durationMs }} ms</span>
-                                    {% else %}—{% endif %}
+                                        <span class="request-log__duration request-log__duration--{{ durationTone }}">{{ entry.durationMs }}<span class="request-log__duration-unit">ms</span></span>
+                                        <span class="request-log__bar" aria-hidden="true">
+                                            <span class="request-log__bar-fill request-log__bar-fill--{{ durationTone }}" style="width: {{ longestDuration > 0 ? ((entry.durationMs / longestDuration) * 100)|round(1) : 0 }}%"></span>
+                                        </span>
+                                    {% else %}
+                                        <span class="request-log__muted">—</span>
+                                    {% endif %}
+                                    {% if entry.contentLength is not null %}
+                                        <span class="request-log__sub">
+                                            {%- if entry.contentLength >= 1048576 -%}
+                                                {{ (entry.contentLength / 1048576)|round(1) }} MB
+                                            {%- elseif entry.contentLength >= 1024 -%}
+                                                {{ (entry.contentLength / 1024)|round(1) }} KB
+                                            {%- else -%}
+                                                {{ entry.contentLength }} B
+                                            {%- endif -%}
+                                        </span>
+                                    {% endif %}
                                 </td>
-                                <td>
-                                    {% if entry.type == 'request' %}
+                                <td class="request-log__payload-cell">
+                                    {% if entry.payload is not empty %}
                                         <details class="request-log__payload">
-                                            <summary>{{ entry.payload|length }} field(s)</summary>
-                                            <pre>{{ entry.payload|json_encode(128 b-or 64) }}</pre>
+                                            <summary>
+                                                <span class="request-log__payload-count">{{ entry.payload|length }}</span>
+                                                <span class="request-log__payload-label">{{ 'field(s)'|trans }}</span>
+                                            </summary>
+                                            <div class="request-log__payload-body">
+                                                <dl class="request-log__payload-fields">
+                                                    {% for field, value in entry.payload %}
+                                                        <dt>{{ field }}</dt>
+                                                        <dd>
+                                                            {%- if value is iterable -%}
+                                                                {{ value|json_encode(128 b-or 64) }}
+                                                            {%- elseif value is same as(true) -%}
+                                                                true
+                                                            {%- elseif value is same as(false) -%}
+                                                                false
+                                                            {%- elseif value is null -%}
+                                                                <span class="request-log__null">null</span>
+                                                            {%- else -%}
+                                                                {{ value }}
+                                                            {%- endif -%}
+                                                        </dd>
+                                                    {% endfor %}
+                                                </dl>
+                                                <details class="request-log__payload-raw">
+                                                    <summary>{{ 'Raw JSON'|trans }}</summary>
+                                                    <pre>{{ entry.payload|json_encode(128 b-or 64) }}</pre>
+                                                </details>
+                                            </div>
                                         </details>
-                                    {% else %}—{% endif %}
+                                    {% else %}
+                                        <span class="request-log__muted">—</span>
+                                    {% endif %}
                                 </td>
                             </tr>
+
+                            {% set previousEntry = entry %}
                         {% endfor %}
                     </tbody>
                 </table>

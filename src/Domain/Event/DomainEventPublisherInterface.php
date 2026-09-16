@@ -6,5 +6,5 @@ namespace App\Domain\Event;
 
 interface DomainEventPublisherInterface
 {
-    public function publish(DomainEventInterface ...$events): void;
+    public function publish(DomainEventInterface $event): void;
 }

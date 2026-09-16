@@ -436,15 +436,88 @@ body {
     font-size: 0.85rem;
 }
 
+.request-log__heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
 .request-log__header .request-log__filtered {
     display: inline-block;
-    margin-left: 0.4rem;
     padding: 0.05rem 0.5rem;
     border-radius: 999px;
     background: #eff2ff;
     color: #2563eb;
     font-size: 0.72rem;
     font-weight: 600;
+}
+
+.request-log__header .request-log__meta {
+    margin-top: 0.35rem;
+    color: #6b7280;
+    font-variant-numeric: tabular-nums;
+}
+
+.request-log__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.65rem;
+}
+
+.request-log__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.65rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #4b5563;
+    font-size: 0.72rem;
+}
+
+.request-log__stat-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #9ca3af;
+}
+
+.request-log__stat-value {
+    color: #111827;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.request-log__stat-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.request-log__stat--request .request-log__stat-dot {
+    background: #2563eb;
+}
+
+.request-log__stat--response .request-log__stat-dot {
+    background: #047857;
+}
+
+.request-log__stat--error {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.request-log__stat--error .request-log__stat-dot {
+    background: #dc2626;
+}
+
+.request-log__stat--error .request-log__stat-value {
+    color: #991b1b;
 }
 
 .request-log__empty {
@@ -545,21 +618,22 @@ body {
 
 .request-log__table {
     width: 100%;
+    border: 1px solid #d1d5db;
     border-collapse: collapse;
     font-size: 0.8rem;
 }
 
 .request-log__table th,
 .request-log__table td {
-    padding: 0.35rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     text-align: left;
-    border-bottom: 1px solid #f3f4f6;
+    border: 1px solid #d1d5db;
     vertical-align: top;
     white-space: nowrap;
 }
 
 .request-log__table th {
-    background: #f9fafb;
+    background: #f2f2f2;
     font-size: 0.68rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -567,22 +641,97 @@ body {
     position: sticky;
     top: 0;
     z-index: 1;
-    border-bottom: 1px solid #e5e7eb;
+    border: 1px solid #d1d5db;
 }
 
 .request-log__row--request td {
     background: #fafbff;
 }
 
+/* Each request starts a new pair: thicker separator, blue accent. */
+.request-log__row--request td:first-child {
+    border-top: 2px solid #e5e7eb;
+    border-left: 3px solid #c7d2fe;
+}
+
+.request-log__row--paired td:first-child {
+    border-left: 3px solid #c7d2fe;
+}
+
+.request-log__row--ok td:first-child {
+    border-left: 3px solid #22c55e;
+}
+
+.request-log__row--redirect td:first-child {
+    border-left: 3px solid #f59e0b;
+}
+
+.request-log__row--error td:first-child {
+    border-left: 3px solid #dc2626;
+}
+
+.request-log__row--server-error td:first-child {
+    border-left: 3px solid #991b1b;
+}
+
 .request-log__row:hover td {
     background: #f0f5ff;
 }
 
+/* The paired response repeats the request timestamp, so it is dimmed. */
+.request-log__row--paired .request-log__time {
+    opacity: 0.45;
+}
+
 .request-log__time {
-    color: #9ca3af;
+    color: #6b7280;
     font-variant-numeric: tabular-nums;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.request-log__date {
+    display: block;
+    color: #9ca3af;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.request-log__clock {
+    display: block;
+    color: #374151;
+}
+
+.request-log__muted {
+    color: #d1d5db;
+}
+
+.request-log__sub {
+    display: block;
+    margin-top: 0.15rem;
+    color: #9ca3af;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+.request-log__sub-sep {
+    margin: 0 0.3rem;
+    color: #d1d5db;
+}
+
+.request-log__type-cell {
+    white-space: nowrap;
+}
+
+.request-log__pair-marker {
+    display: inline-block;
+    margin-right: 0.35rem;
+    color: #c7cdd6;
+    font-size: 0.85rem;
 }
 
 .request-log__type {
@@ -605,6 +754,9 @@ body {
 }
 
 .request-log__method {
+    display: inline-block;
+    background: #f3f4f6;
+    color: #4b5563;
     font-size: 0.65rem;
     font-weight: 700;
     padding: 0.1rem 0.4rem;
@@ -648,11 +800,20 @@ body {
 }
 
 .request-log__route {
-    color: #9ca3af;
-    font-size: 0.68rem;
+    color: #6b7280;
+}
+
+.request-log__ip {
+    font-variant-numeric: tabular-nums;
+}
+
+.request-log__duration-cell {
+    min-width: 6.5rem;
 }
 
 .request-log__status {
+    background: #f3f4f6;
+    color: #374151;
     font-weight: 700;
     display: inline-block;
     min-width: 2.1rem;
@@ -684,51 +845,174 @@ body {
 }
 
 .request-log__content-type {
+    display: block;
+    margin-top: 0.15rem;
     color: #9ca3af;
     font-size: 0.65rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
     white-space: normal;
 }
 
 .request-log__duration {
     color: #374151;
     font-variant-numeric: tabular-nums;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.request-log__duration-unit {
+    margin-left: 0.15rem;
+    color: #9ca3af;
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+.request-log__duration--fast {
+    color: #047857;
 }
 
 .request-log__duration--warn {
     color: #92400e;
-    font-weight: 600;
 }
 
 .request-log__duration--slow {
     color: #991b1b;
-    font-weight: 700;
+}
+
+/* Mini bar scaled to the slowest response on the page. */
+.request-log__bar {
+    display: block;
+    width: 100%;
+    max-width: 90px;
+    height: 0.25rem;
+    margin-top: 0.3rem;
+    border-radius: 999px;
+    background: #eef2f7;
+    overflow: hidden;
+}
+
+.request-log__bar-fill {
+    display: block;
+    min-width: 2px;
+    height: 100%;
+    border-radius: 999px;
+    background: #22c55e;
+}
+
+.request-log__bar-fill--warn {
+    background: #f59e0b;
+}
+
+.request-log__bar-fill--slow {
+    background: #dc2626;
+}
+
+.request-log__payload-cell {
+    white-space: normal;
 }
 
 .request-log__payload summary {
-    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.12rem 0.55rem;
+    border-radius: 999px;
+    background: #eff2ff;
     color: #2563eb;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
     user-select: none;
-    width: fit-content;
+    list-style: none;
+}
+
+.request-log__payload summary::-webkit-details-marker {
+    display: none;
+}
+
+.request-log__payload summary:hover {
+    background: #dbe4ff;
+}
+
+.request-log__payload[open] summary {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.request-log__payload-count {
+    font-variant-numeric: tabular-nums;
+}
+
+.request-log__payload-label {
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+.request-log__payload-body {
+    max-width: 640px;
+    margin-top: 0.4rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.4rem;
+    background: #f9fafb;
+}
+
+.request-log__payload-fields {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: 0.2rem 0.75rem;
+    margin: 0;
+    font-size: 0.7rem;
+}
+
+.request-log__payload-fields dt {
+    color: #6b7280;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.request-log__payload-fields dd {
+    margin: 0;
+    color: #111827;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow-wrap: anywhere;
+}
+
+.request-log__null {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.request-log__payload-raw {
+    margin-top: 0.45rem;
+}
+
+.request-log__payload-body .request-log__payload-raw summary {
+    padding: 0;
+    background: none;
+    color: #6b7280;
+    font-size: 0.68rem;
+    font-weight: 500;
+}
+
+.request-log__payload-body .request-log__payload-raw summary:hover,
+.request-log__payload-body .request-log__payload-raw[open] summary {
+    background: none;
+    color: #2563eb;
 }
 
 .request-log__payload pre {
-    margin: 0.3rem 0 0.15rem;
+    max-width: 640px;
+    margin: 0.35rem 0 0;
     padding: 0.5rem 0.65rem;
-    background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 0.4rem;
-    font-size: 0.7rem;
+    background: #ffffff;
+    color: #374151;
+    font-size: 0.68rem;
     overflow-x: auto;
-    white-space: pre-wrap;
-    max-width: 640px;
-    white-space: nowrap;
 }
 
 .request-log__pagination {
@@ -787,7 +1071,9 @@ body {
     }
 
     .request-log__route,
-    .request-log__content-type {
+    .request-log__ip,
+    .request-log__content-type,
+    .request-log__bar {
         display: none;
     }
 }

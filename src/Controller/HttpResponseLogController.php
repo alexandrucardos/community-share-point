@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Service\RequestLog\PayloadLogFileReader;
+use App\Service\RequestLog\DatabaseRequestLogReader;
 use App\Service\RequestLog\RequestLogFilter;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,20 +14,20 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * Lists request/response log entries from the `request_payload` channel.
+ * Lists request/response log entries from the `request_response_log` database table.
  *
  * Intentionally shows everything (all groups/users) — a diagnostic page,
  * currently open to ROLE_GUEST ("for now", per project decision).
  */
-final class RequestResponseLogController extends AbstractController
+final class HttpResponseLogController extends AbstractController
 {
-    private const PAGE_SIZE = 200;
+    private const PAGE_SIZE = 10;
 
     #[Route('/group/{uuid}/request-log', name: 'request_response_log', methods: ['GET'], requirements: ['uuid' => GroupRoute::UUID])]
     #[IsGranted('ROLE_GUEST')]
     public function __invoke(
         string $uuid,
-        PayloadLogFileReader $reader,
+        DatabaseRequestLogReader $reader,
         PaginatorInterface $paginator,
         #[MapQueryParameter] string $type = '',
         #[MapQueryParameter] string $method = '',
@@ -44,11 +44,13 @@ final class RequestResponseLogController extends AbstractController
             search: $search !== '' ? $search : null,
         );
 
-        $pagination = $paginator->paginate(
-            $reader->read($filter),
-            $page,
-            self::PAGE_SIZE,
-        );
+        // The reader pages the log in the database; the paginator is given the
+        // page it already selected, and the real total so the widget and the
+        // header can report it.
+        $page = max(1, $page);
+        $pageResult = $reader->readPage($filter, $page, self::PAGE_SIZE);
+        $pagination = $paginator->paginate($pageResult->entries, $page, self::PAGE_SIZE);
+        $pagination->setTotalItemCount($pageResult->totalItemCount);
 
         return $this->render('request_response_log/index.html.twig', [
             'pagination' => $pagination,
