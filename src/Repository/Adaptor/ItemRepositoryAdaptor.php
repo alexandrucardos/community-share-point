@@ -6,6 +6,8 @@ namespace App\Repository\Adaptor;
 
 use App\Domain\Item\ItemEntity;
 use App\Domain\Item\ItemRepositoryInterface;
+use App\Domain\ValueObject\ItemDescriptionValueObject;
+use App\Domain\ValueObject\ItemNameValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 use App\Domain\ValueObject\ValidatorInterface;
 use App\Entity\Item;
@@ -60,8 +62,8 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
         $record = new Item();
         $record->id = $item->getId()->value;
         $record->userId = $item->getUserId()->value;
-        $record->name = $item->getName();
-        $record->description = $item->getDescription();
+        $record->name = $item->getName()->value;
+        $record->description = $item->getDescription()->value;
         $record->status = $item->getStatus();
 
         return $record;
@@ -72,8 +74,8 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
         $item = new ItemEntity((new UuidValueObject($this->validator))($record->id));
 
         $item->setUserId((new UuidValueObject($this->validator))($record->userId));
-        $item->setName($record->name);
-        $item->setDescription($record->description);
+        $item->setName(new ItemNameValueObject($this->validator, $record->name));
+        $item->setDescription(new ItemDescriptionValueObject($this->validator, $record->description));
         $item->setStatus($record->status);
 
         $item->setFileName($record->imageFilename);

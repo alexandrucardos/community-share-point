@@ -18,8 +18,6 @@ final class CreateItemHandler
 {
     public function __construct(
         private readonly ItemRepositoryInterface $itemRepository,
-        private readonly ItemNameValueObject $nameValidator,
-        private readonly ItemDescriptionValueObject $descriptionValidator,
         private readonly UuidInterface $uuid,
         private readonly UuidValueObject $uuidValueObject,
         private readonly ValidatorInterface $validator,
@@ -29,16 +27,16 @@ final class CreateItemHandler
 
     public function handle(CreateItemCommand $command): void
     {
-        ($this->nameValidator)($command->name);
-        ($this->descriptionValidator)($command->description);
+        $itemNameVO = new ItemNameValueObject($this->validator,$command->name);
+        $itemDescriptionVO = new ItemDescriptionValueObject($this->validator,$command->description);
 
         $item = new ItemEntity(
             (new UuidValueObject($this->validator))($this->uuid->generate())
         );
 
         $item->setUserId(($this->uuidValueObject)($command->userId));
-        $item->setName($command->name);
-        $item->setDescription($command->description);
+        $item->setName($itemNameVO);
+        $item->setDescription($itemDescriptionVO);
         $item->setStatus($command->status->value);
 
         if ($command->fileInfo !== null) {
@@ -53,8 +51,8 @@ final class CreateItemHandler
         $this->domainEventPublisher->publish(new ItemCreatedEvent(
             itemId: $item->getId()->value,
             userId: $item->getUserId()->value,
-            name: $item->getName(),
-            description: $item->getDescription(),
+            name: $item->getName()->value,
+            description: $item->getDescription()->value,
             status: $item->getStatus(),
             imageFilename: $item->isContainsFile() ? $item->getFileName() : null,
         ));

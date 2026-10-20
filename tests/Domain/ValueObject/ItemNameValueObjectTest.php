@@ -44,9 +44,7 @@ final class ItemNameValueObjectTest extends TestCase
                 })
             );
 
-        $itemNameValueObject = new ItemNameValueObject($validator);
-
-        $itemNameValueObject($value);
+        $itemNameValueObject = new ItemNameValueObject($validator, $value);
 
         self::assertSame($value, $itemNameValueObject->value);
     }
@@ -57,11 +55,9 @@ final class ItemNameValueObjectTest extends TestCase
         $validator->method('validate')
             ->willThrowException(new \InvalidArgumentException('item.name.not_blank'));
 
-        $itemNameValueObject = new ItemNameValueObject($validator);
-
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('item.name.not_blank');
 
-        $itemNameValueObject('');
+        new ItemNameValueObject($validator, '');
     }
 }

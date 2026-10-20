@@ -44,9 +44,7 @@ final class ItemDescriptionValueObjectTest extends TestCase
                 })
             );
 
-        $itemDescriptionValueObject = new ItemDescriptionValueObject($validator);
-
-        $itemDescriptionValueObject($value);
+        $itemDescriptionValueObject = new ItemDescriptionValueObject($validator, $value);
 
         self::assertSame($value, $itemDescriptionValueObject->value);
     }
@@ -57,11 +55,9 @@ final class ItemDescriptionValueObjectTest extends TestCase
         $validator->method('validate')
             ->willThrowException(new \InvalidArgumentException('item.description.max_length'));
 
-        $itemDescriptionValueObject = new ItemDescriptionValueObject($validator);
-
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('item.description.max_length');
 
-        $itemDescriptionValueObject(str_repeat('x', 501));
+        new ItemDescriptionValueObject($validator, str_repeat('x', 501));
     }
 }

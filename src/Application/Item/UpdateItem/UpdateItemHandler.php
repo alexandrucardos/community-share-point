@@ -11,14 +11,14 @@ use App\Domain\Item\Exception\ItemNotFoundException;
 use App\Domain\Item\ItemRepositoryInterface;
 use App\Domain\ValueObject\ItemDescriptionValueObject;
 use App\Domain\ValueObject\ItemNameValueObject;
+use App\Domain\ValueObject\ValidatorInterface;
 
 final class UpdateItemHandler
 {
     public function __construct(
         private readonly ItemRepositoryInterface $itemRepository,
-        private readonly ItemNameValueObject $nameValidator,
-        private readonly ItemDescriptionValueObject $descriptionValidator,
         private readonly DomainEventPublisherInterface $domainEventPublisher,
+        private readonly ValidatorInterface $validator,
     ) {
     }
 
@@ -35,12 +35,11 @@ final class UpdateItemHandler
             throw new ItemAccessDeniedException();
         }
 
-        //todo are this necessary ?
-        ($this->nameValidator)($command->name);
-        ($this->descriptionValidator)($command->description);
+        $itemNameVO = new ItemNameValueObject($this->validator,$command->name);
+        $itemDescriptionVO = new ItemDescriptionValueObject($this->validator,$command->description);
 
-        $item->setName($command->name);
-        $item->setDescription($command->description);
+        $item->setName($itemNameVO);
+        $item->setDescription($itemDescriptionVO);
         $item->setStatus($command->status->value);
 
         if ($command->fileInfo !== null) {
@@ -55,8 +54,8 @@ final class UpdateItemHandler
         $this->domainEventPublisher->publish(new ItemUpdatedEvent(
             itemId: $item->getId()->value,
             userId: $item->getUserId()->value,
-            name: $item->getName(),
-            description: $item->getDescription(),
+            name: $item->getName()->value,
+            description: $item->getDescription()->value,
             status: $item->getStatus(),
             imageFilename: $item->getFileName() ?: null,
         ));

@@ -6,6 +6,7 @@ namespace App\Tests\Application\User\UpdateUser;
 
 use App\Application\User\UpdateUser\UpdateUserCommand;
 use App\Application\User\UpdateUser\UpdateUserHandler;
+use App\Domain\Event\DomainEventPublisherInterface;
 use App\Domain\User\Exception\InvalidCurrentPasswordException;
 use App\Domain\User\Exception\UserNotFoundException;
 use App\Domain\User\PasswordHasherInterface;
@@ -43,6 +44,7 @@ final class UpdateUserHandlerTest extends TestCase
             $this->userRepository,
             $this->passwordHasher,
             $this->validator,
+            $this->createMock(DomainEventPublisherInterface::class),
         );
     }
 

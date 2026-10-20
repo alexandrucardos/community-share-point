@@ -4,14 +4,16 @@ namespace App\Domain\Item;
 
 use App\Domain\Item\Exception\InvalidFileExtensionException;
 use App\Domain\ValueObject\FileValueObject;
+use App\Domain\ValueObject\ItemDescriptionValueObject;
+use App\Domain\ValueObject\ItemNameValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 
 final class ItemEntity
 {
     private const FILE_MAX_SIZE = 300;
 
-    private string $name;
-    private string $description;
+    private ItemNameValueObject $name;
+    private ItemDescriptionValueObject $description;
     private string $status;
     private UuidValueObject $userId;
     private FileExtension $fileExtension;
@@ -42,22 +44,22 @@ final class ItemEntity
         $this->userId = $userId;
     }
 
-    public function getName(): string
+    public function getName(): ItemNameValueObject
     {
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName(ItemNameValueObject $name): void
     {
         $this->name = $name;
     }
 
-    public function getDescription(): string
+    public function getDescription(): ItemDescriptionValueObject
     {
         return $this->description;
     }
 
-    public function setDescription(string $description): void
+    public function setDescription(ItemDescriptionValueObject $description): void
     {
         $this->description = $description;
     }

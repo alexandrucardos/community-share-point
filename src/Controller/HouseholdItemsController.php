@@ -129,10 +129,10 @@ final class HouseholdItemsController extends AbstractController
         }
 
         $errors = [];
-        $name = $item->getName();
-        $description = $item->getDescription();
+        $name = $item->getName()->value;
+        $description = $item->getDescription()->value;
         $status = $item->getStatus();
-        $currentImageUrl = $imageResolver->url($item->getFileName(), $item->getName());
+        $currentImageUrl = $imageResolver->url($item->getFileName(), $item->getName()->value);
 
         if ($request->isMethod('POST')) {
             $name = (string) $request->request->get('name', '');

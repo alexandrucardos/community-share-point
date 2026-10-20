@@ -7,6 +7,8 @@ namespace App\Tests\Domain\Item;
 use App\Domain\Item\Exception\InvalidFileExtensionException;
 use App\Domain\Item\FileExtension;
 use App\Domain\Item\ItemEntity;
+use App\Domain\ValueObject\ItemDescriptionValueObject;
+use App\Domain\ValueObject\ItemNameValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 use App\Domain\ValueObject\ValidatorInterface;
 use PHPUnit\Framework\TestCase;
@@ -54,16 +56,20 @@ final class ItemEntityTest extends TestCase
 
     public function testNameRoundTripsThroughSetterAndGetter(): void
     {
-        $this->entity->setName('Drill');
+        $name = new ItemNameValueObject($this->validator, 'Drill');
+        $this->entity->setName($name);
 
-        self::assertSame('Drill', $this->entity->getName());
+        self::assertSame($name, $this->entity->getName());
+        self::assertSame('Drill', $this->entity->getName()->value);
     }
 
     public function testDescriptionRoundTripsThroughSetterAndGetter(): void
     {
-        $this->entity->setDescription('Cordless drill with two batteries');
+        $description = new ItemDescriptionValueObject($this->validator, 'Cordless drill with two batteries');
+        $this->entity->setDescription($description);
 
-        self::assertSame('Cordless drill with two batteries', $this->entity->getDescription());
+        self::assertSame($description, $this->entity->getDescription());
+        self::assertSame('Cordless drill with two batteries', $this->entity->getDescription()->value);
     }
 
     public function testStatusRoundTripsThroughSetterAndGetter(): void

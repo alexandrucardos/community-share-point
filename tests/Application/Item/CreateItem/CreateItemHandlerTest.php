@@ -42,8 +42,6 @@ final class CreateItemHandlerTest extends TestCase
 
         $this->handler = new CreateItemHandler(
             $this->itemRepository,
-            new ItemNameValueObject($validator),
-            new ItemDescriptionValueObject($validator),
             $uuid,
             new UuidValueObject($validator),
             $validator,

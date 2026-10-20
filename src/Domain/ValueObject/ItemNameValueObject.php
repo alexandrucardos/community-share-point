@@ -8,15 +8,15 @@ use App\Domain\ValueObject\DTO\ConstraintDto;
 
 final class ItemNameValueObject
 {
-    public readonly mixed $value;
-
     public function __construct(
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        public readonly mixed $value
     )
     {
+        $this->validate($value);
     }
 
-    public function __invoke(mixed $value): void
+    private function validate(mixed $value): void
     {
         $constraints = [
             new ConstraintDto(Constraint::NotBlank, [Constraint::NOT_BLANK_MSG => 'item.name.not_blank']),
@@ -32,7 +32,5 @@ final class ItemNameValueObject
             $value,
             $constraints
         );
-
-        $this->value = $value;
     }
 }

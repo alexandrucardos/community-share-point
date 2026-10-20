@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Repository\Adaptor;
 
 use App\Domain\Item\ItemEntity;
+use App\Domain\ValueObject\ItemDescriptionValueObject;
+use App\Domain\ValueObject\ItemNameValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 use App\Entity\Item;
 use App\Repository\Adaptor\ItemRepositoryAdaptor;
@@ -92,8 +94,8 @@ final class ItemRepositoryAdaptorTest extends TestCase
         self::assertNotNull($found);
         self::assertSame($id, $found->getId()->value);
         self::assertSame(self::USER_ID, $found->getUserId()->value);
-        self::assertSame('Drill', $found->getName());
-        self::assertSame('a description', $found->getDescription());
+        self::assertSame('Drill', $found->getName()->value);
+        self::assertSame('a description', $found->getDescription()->value);
         self::assertSame('Available', $found->getStatus());
         self::assertSame('', $found->getFileName());
     }
@@ -106,16 +108,16 @@ final class ItemRepositoryAdaptorTest extends TestCase
 
         $item = $this->repository->findById($id);
         self::assertNotNull($item);
-        $item->setName('After');
+        $item->setName(new ItemNameValueObject($this->validator, 'After'));
         $item->setStatus('Reserved');
         $this->repository->update($item);
 
         $reloaded = $this->repository->findById($id);
 
         self::assertNotNull($reloaded);
-        self::assertSame('After', $reloaded->getName());
+        self::assertSame('After', $reloaded->getName()->value);
         self::assertSame('Reserved', $reloaded->getStatus());
-        self::assertSame('a description', $reloaded->getDescription());
+        self::assertSame('a description', $reloaded->getDescription()->value);
     }
 
     public function testUpdateWithoutANewFileKeepsTheStoredImageFilename(): void
@@ -126,13 +128,13 @@ final class ItemRepositoryAdaptorTest extends TestCase
 
         $item = $this->repository->findById($id);
         self::assertNotNull($item);
-        $item->setName('Renamed drill');
+        $item->setName(new ItemNameValueObject($this->validator, 'Renamed drill'));
         $this->repository->update($item);
 
         $reloaded = $this->repository->findById($id);
 
         self::assertNotNull($reloaded);
-        self::assertSame('Renamed drill', $reloaded->getName());
+        self::assertSame('Renamed drill', $reloaded->getName()->value);
         self::assertSame('', $reloaded->getFileName());
     }
 
@@ -157,8 +159,8 @@ final class ItemRepositoryAdaptorTest extends TestCase
     {
         $item = new ItemEntity($this->uuid($id));
         $item->setUserId($this->uuid(self::USER_ID));
-        $item->setName($name);
-        $item->setDescription('a description');
+        $item->setName(new ItemNameValueObject($this->validator, $name));
+        $item->setDescription(new ItemDescriptionValueObject($this->validator, 'a description'));
         $item->setStatus('Available');
 
         return $item;

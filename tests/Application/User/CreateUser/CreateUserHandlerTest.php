@@ -6,6 +6,7 @@ namespace App\Tests\Application\User\CreateUser;
 
 use App\Application\User\CreateUser\CreateUserCommand;
 use App\Application\User\CreateUser\CreateUserHandler;
+use App\Domain\Event\DomainEventPublisherInterface;
 use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
 use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserEntity;
@@ -45,6 +46,7 @@ final class CreateUserHandlerTest extends TestCase
             $this->passwordHasher,
             $this->validator,
             $uuid,
+            $this->createMock(DomainEventPublisherInterface::class),
         );
     }
 
