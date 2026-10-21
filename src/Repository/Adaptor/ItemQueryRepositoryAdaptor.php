@@ -7,7 +7,6 @@ namespace App\Repository\Adaptor;
 use App\Application\Item\ItemQueryRepositoryInterface;
 use App\Application\Item\ListGroupItems\GroupItemView;
 use App\Application\Item\ListUserItems\UserItemView;
-use App\Domain\Item\ItemStatus;
 use App\Entity\Item;
 use App\Repository\ItemRepository;
 use App\Repository\UserRepository;
@@ -19,7 +18,8 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
         private readonly ItemRepository    $items,
         private readonly UserRepository    $users,
         private readonly ItemImageResolver $imageResolver,
-    ) {
+    )
+    {
     }
 
     public function findAllByUserId(
@@ -27,7 +27,7 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
     ): array
     {
         return array_map(
-            fn (Item $record): UserItemView => new UserItemView(
+            fn(Item $record): UserItemView => new UserItemView(
                 id: $record->id,
                 name: $record->name,
                 status: $record->status,
@@ -45,13 +45,10 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
             $contactInfoByUserId[$user->id] = $user->contactInfo;
         }
 
-        $records = array_filter(
-            $this->items->findByUserIds(array_keys($contactInfoByUserId)),
-            static fn (Item $record): bool => $record->status !== ItemStatus::Deleted->value,
-        );
+        $records = $this->items->findByUserIds(array_keys($contactInfoByUserId));
 
         return array_map(
-            fn (Item $record): GroupItemView => new GroupItemView(
+            fn(Item $record): GroupItemView => new GroupItemView(
                 id: $record->id,
                 name: $record->name,
                 status: $record->status,

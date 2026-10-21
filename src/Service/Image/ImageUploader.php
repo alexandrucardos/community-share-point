@@ -24,6 +24,20 @@ final class ImageUploader
         $this->encode($item);
     }
 
+    public function delete(ItemEntity $item): void
+    {
+        $fileName = $item->getFileName();
+
+        if ($fileName === '') {
+            return;
+        }
+
+        $this->s3->deleteObject([
+            'Bucket' => $this->awsS3Bucket,
+            'Key' => $this->key($fileName),
+        ])->resolve();
+    }
+
     private function encode(
         ItemEntity $item,
     ): void

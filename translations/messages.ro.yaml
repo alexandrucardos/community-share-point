@@ -44,6 +44,8 @@ item:
 "You haven't added any items yet.": "Nu ai adăugat niciun articol încă."
 "Add your first item": "Adaugă primul tău articol"
 "Edit": "Editează"
+"Delete": "Șterge"
+"Are you sure you want to delete this item?": "Sigur dorești să ștergi acest articol?"
 "No items have been shared yet.": "Niciun articol nu a fost partajat încă."
 "Submitted by you": "Adăugat de tine"
 "Submitted by %contact_info%": "Adăugat de %contact_info%"

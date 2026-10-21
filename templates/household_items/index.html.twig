@@ -10,7 +10,8 @@
         </div>
 
         {% if items is empty %}
-            <p class="items-empty">{{ "You haven't added any items yet."|trans }} <a href="{{ path('household_items_new') }}">{{ 'Add your first item'|trans }}</a>.</p>
+            <p class="items-empty">{{ "You haven't added any items yet."|trans }} <a
+                        href="{{ path('household_items_new') }}">{{ 'Add your first item'|trans }}</a>.</p>
         {% else %}
             <div class="items-grid">
                 {% for item in items %}
@@ -27,7 +28,14 @@
 
                             <p class="item-card__description">{{ item.description }}</p>
 
-                            <a class="item-card__edit" href="{{ path('household_items_edit', {id: item.id}) }}">{{ 'Edit'|trans }}</a>
+                            <a class="item-card__edit"
+                               href="{{ path('household_items_edit', {id: item.id}) }}">{{ 'Edit'|trans }}</a>
+                            <form method="post" action="{{ path('household_items_delete', {id: item.id}) }}"
+                                  onsubmit="return confirm('{{ 'Are you sure you want to delete this item?'|trans|e('js') }}');">
+                                <input type="hidden" name="_csrf_token"
+                                       value="{{ csrf_token('delete_item_' ~ item.id) }}">
+                                <button type="submit" class="item-card__delete">{{ 'Delete'|trans }}</button>
+                            </form>
                         </div>
                     </article>
                 {% endfor %}

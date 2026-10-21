@@ -24,14 +24,14 @@ use PHPUnit\Framework\MockObject\Stub;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 use Symfony\Component\Translation\Translator;
 
 /**
  * Drives the domain-facing adaptor against a real (in-memory) Doctrine ORM
  * stack so the Item record mapping and the Record <-> domain translation are
- * both exercised. The image-upload path stays disabled (no attached file), so
- * the S3 client is wired to a mock HTTP client that is never contacted.
+ * both exercised. S3 requests use a mock HTTP client so tests never contact AWS.
  */
 final class ItemRepositoryAdaptorTest extends TestCase
 {
@@ -40,6 +40,7 @@ final class ItemRepositoryAdaptorTest extends TestCase
     private ItemRepositoryAdaptor $repository;
     private ValidatorService $validator;
     private Stub&ManagerRegistry $registry;
+    private array $s3Requests = [];
 
     protected function setUp(): void
     {
@@ -62,14 +63,21 @@ final class ItemRepositoryAdaptorTest extends TestCase
         $this->registry = $this->createStub(ManagerRegistry::class);
         $this->registry->method('getManagerForClass')->willReturn($entityManager);
 
-        $imageUploader = new ImageUploader(
-            new S3Client([
+        $s3Client = new S3Client(
+            [
                 'accessKeyId' => 'test-key',
                 'accessKeySecret' => 'test-secret',
-            ]),
-            'test-bucket',
-            'items',
+                'region' => 'us-east-1',
+            ],
+            null,
+            new MockHttpClient(function (string $method, string $url, array $options): MockResponse {
+                $this->s3Requests[] = ['method' => $method, 'url' => $url];
+
+                return new MockResponse('', ['http_code' => 204]);
+            }),
         );
+
+        $imageUploader = new ImageUploader($s3Client, 'test-bucket', 'items');
 
         $this->repository = new ItemRepositoryAdaptor(
             new ItemRepository($this->registry),
@@ -136,6 +144,41 @@ final class ItemRepositoryAdaptorTest extends TestCase
         self::assertNotNull($reloaded);
         self::assertSame('Renamed drill', $reloaded->getName()->value);
         self::assertSame('', $reloaded->getFileName());
+    }
+
+    public function testDeleteRemovesTheItemFromTheDatabaseAndItsImageFromS3(): void
+    {
+        $id = 'a5555555-5555-4555-8555-555555555555';
+        $this->repository->add($this->buildItem($id, 'Drill'));
+
+        $entityManager = $this->registry->getManagerForClass(Item::class);
+        /** @var Item $record */
+        $record = $entityManager->find(Item::class, $id);
+        $record->imageFilename = 'drill.png';
+        $entityManager->flush();
+
+        $item = $this->repository->findById($id);
+        self::assertNotNull($item);
+
+        $this->repository->delete($item);
+
+        self::assertNull($this->repository->findById($id));
+        self::assertCount(1, $this->s3Requests);
+        self::assertSame('DELETE', $this->s3Requests[0]['method']);
+        self::assertSame('/items/drill.png', parse_url($this->s3Requests[0]['url'], PHP_URL_PATH));
+        self::assertStringContainsString('test-bucket', (string) parse_url($this->s3Requests[0]['url'], PHP_URL_HOST));
+    }
+
+    public function testDeleteWithoutAnImageOnlyRemovesTheDatabaseRecord(): void
+    {
+        $id = 'a6666666-6666-4666-8666-666666666666';
+        $item = $this->buildItem($id, 'Ladder');
+        $this->repository->add($item);
+
+        $this->repository->delete($item);
+
+        self::assertNull($this->repository->findById($id));
+        self::assertSame([], $this->s3Requests);
     }
 
     public function testAddPersistsTheRecordWithTheExpectedFieldValues(): void

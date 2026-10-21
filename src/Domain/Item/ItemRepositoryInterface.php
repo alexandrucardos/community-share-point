@@ -10,5 +10,7 @@ interface ItemRepositoryInterface
 
     public function update(ItemEntity $item): void;
 
+    public function delete(ItemEntity $item): void;
+
     public function findById(string $id): ?ItemEntity;
 }

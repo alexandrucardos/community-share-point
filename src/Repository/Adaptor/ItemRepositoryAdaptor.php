@@ -17,17 +17,18 @@ use App\Service\Image\ImageUploader;
 final class ItemRepositoryAdaptor implements ItemRepositoryInterface
 {
     public function __construct(
-        private readonly ItemRepository $records,
-        private readonly ValidatorInterface    $validator,
-        private readonly ImageUploader $imageUploader
-    ) {
+        private readonly ItemRepository     $records,
+        private readonly ValidatorInterface $validator,
+        private readonly ImageUploader      $imageUploader
+    )
+    {
     }
 
     public function add(ItemEntity $item): void
     {
         $record = $this->toRecord($item);
 
-        if($item->isContainsFile() === true) {
+        if ($item->isContainsFile() === true) {
             $this->imageUploader->upload($item);
             $record->imageFilename = $item->getFileName();
         }
@@ -39,7 +40,7 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
     {
         $record = $this->toRecord($item);
 
-        if($item->isContainsFile() === true) {
+        if ($item->isContainsFile() === true) {
             $this->imageUploader->upload($item);
         }
 
@@ -55,6 +56,19 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
         $record = $this->records->find($id);
 
         return $record === null ? null : $this->toDomain($record);
+    }
+
+    public function delete(ItemEntity $item): void
+    {
+        $itemId = $item->getId()->value;
+        $record = $this->records->find($itemId);
+
+        if ($record === null) {
+            return;
+        }
+
+        $this->imageUploader->delete($this->toDomain($record));
+        $this->records->delete($itemId);
     }
 
     private function toRecord(ItemEntity $item): Item

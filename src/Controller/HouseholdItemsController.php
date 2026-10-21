@@ -6,6 +6,8 @@ namespace App\Controller;
 
 use App\Application\Item\CreateItem\CreateItemCommand;
 use App\Application\Item\CreateItem\CreateItemHandler;
+use App\Application\Item\DeleteItem\DeleteItemCommand;
+use App\Application\Item\DeleteItem\DeleteItemHandler;
 use App\Application\Item\FileInfoDto;
 use App\Application\Item\ListGroupItems\ListGroupItemsHandler;
 use App\Application\Item\ListGroupItems\ListGroupItemsQuery;
@@ -58,8 +60,8 @@ final class HouseholdItemsController extends AbstractController
 
     #[Route('/items/new', name: 'household_items_new', methods: ['GET', 'POST'])]
     public function new(
-        string $uuid,
-        Request $request,
+        string            $uuid,
+        Request           $request,
         CreateItemHandler $addItemHandler,
     ): Response
     {
@@ -72,13 +74,13 @@ final class HouseholdItemsController extends AbstractController
         $currentImageUrl = null;
 
         if ($request->isMethod('POST')) {
-            $name = (string) $request->request->get('name', '');
-            $description = (string) $request->request->get('description', '');
-            $status = (string) $request->request->get('status', '');
+            $name = (string)$request->request->get('name', '');
+            $description = (string)$request->request->get('description', '');
+            $status = (string)$request->request->get('status', '');
             /** @var UploadedFile $imageFile */
             $imageFile = $request->files->get('image');
 
-            if (!$this->isCsrfTokenValid('item_form', (string) $request->request->get('_csrf_token'))) {
+            if (!$this->isCsrfTokenValid('item_form', (string)$request->request->get('_csrf_token'))) {
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
@@ -117,6 +119,32 @@ final class HouseholdItemsController extends AbstractController
         ]);
     }
 
+    #[Route('/items/{id}/delete', name: 'household_items_delete', methods: ['POST'])]
+    public function delete(
+        string            $uuid,
+        Request           $request,
+        string            $id,
+        DeleteItemHandler $deleteItemHandler,
+    ): Response
+    {
+        $this->assertGroup($uuid);
+
+        if (!$this->isCsrfTokenValid('delete_item_' . $id, (string)$request->request->get('_csrf_token'))) {
+            $this->addFlash('error', 'Invalid or expired form submission, please try again.');
+
+            return $this->redirectToRoute('household_items_index');
+        }
+
+        $deleteItemHandler->handle(new DeleteItemCommand(
+            itemId: $id,
+            userId: $this->currentUser()->id,
+        ));
+
+        $this->addFlash('success', 'Item deleted.');
+
+        return $this->redirectToRoute('household_items_index');
+    }
+
     #[Route('/items/{id}/edit', name: 'household_items_edit', methods: ['GET', 'POST'])]
     public function edit(string $uuid, Request $request, string $id, ItemRepositoryInterface $itemRepository, UpdateItemHandler $updateItemHandler, ItemImageResolver $imageResolver): Response
     {
@@ -135,12 +163,12 @@ final class HouseholdItemsController extends AbstractController
         $currentImageUrl = $imageResolver->url($item->getFileName(), $item->getName()->value);
 
         if ($request->isMethod('POST')) {
-            $name = (string) $request->request->get('name', '');
-            $description = (string) $request->request->get('description', '');
-            $status = (string) $request->request->get('status', '');
+            $name = (string)$request->request->get('name', '');
+            $description = (string)$request->request->get('description', '');
+            $status = (string)$request->request->get('status', '');
             $imageFile = $request->files->get('image');
 
-            if (!$this->isCsrfTokenValid('item_form', (string) $request->request->get('_csrf_token'))) {
+            if (!$this->isCsrfTokenValid('item_form', (string)$request->request->get('_csrf_token'))) {
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
@@ -171,6 +199,8 @@ final class HouseholdItemsController extends AbstractController
         return $this->render('household_items/form.html.twig', [
             'errors' => $errors,
             'formAction' => $this->generateUrl('household_items_edit', ['id' => $id]),
+            'deleteAction' => $this->generateUrl('household_items_delete', ['id' => $id]),
+            'itemId' => $id,
             'name' => $name,
             'description' => $description,
             'status' => $status,

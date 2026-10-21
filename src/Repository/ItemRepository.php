@@ -38,6 +38,19 @@ final class ItemRepository extends ServiceEntityRepository
         $manager->flush();
     }
 
+    public function delete(string $id): void
+    {
+        $record = $this->find($id);
+
+        if ($record === null) {
+            return;
+        }
+
+        $manager = $this->getEntityManager();
+        $manager->remove($record);
+        $manager->flush();
+    }
+
     /**
      * @return Item[]
      */
