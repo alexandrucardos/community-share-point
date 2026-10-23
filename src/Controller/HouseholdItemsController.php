@@ -28,6 +28,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[Route('/group/{uuid}', requirements: ['uuid' => GroupRoute::UUID])]
 final class HouseholdItemsController extends AbstractController
@@ -121,10 +122,11 @@ final class HouseholdItemsController extends AbstractController
 
     #[Route('/items/{id}/delete', name: 'household_items_delete', methods: ['POST'])]
     public function delete(
-        string            $uuid,
-        Request           $request,
-        string            $id,
-        DeleteItemHandler $deleteItemHandler,
+        string              $uuid,
+        Request             $request,
+        string              $id,
+        DeleteItemHandler   $deleteItemHandler,
+        TranslatorInterface $translator
     ): Response
     {
         $this->assertGroup($uuid);
@@ -140,7 +142,7 @@ final class HouseholdItemsController extends AbstractController
             userId: $this->currentUser()->id,
         ));
 
-        $this->addFlash('success', 'Item deleted.');
+        $this->addFlash('success', $translator->trans('Item deleted.'));
 
         return $this->redirectToRoute('household_items_index');
     }
