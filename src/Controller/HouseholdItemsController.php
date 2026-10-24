@@ -32,8 +32,6 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/group/{uuid}', requirements: ['uuid' => GroupRoute::UUID])]
 final class HouseholdItemsController extends AbstractController
 {
-    private const IMAGE_SUBDIRECTORY = 'images/items';
-
     #[Route('/items', name: 'household_items_index', methods: ['GET'])]
     public function index(string $uuid, ListUserItemsHandler $listUserItemsHandler): Response
     {
