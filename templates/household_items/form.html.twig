@@ -17,7 +17,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" action="{{ formAction }}" class="auth-form" enctype="multipart/form-data">
+            <form method="post" action="{{ formAction }}" class="auth-form" enctype="multipart/form-data" id="item-form">
                 {% if currentImageUrl %}
                     <img class="item-form-image" src="{{ currentImageUrl }}" alt="{{ 'Photo'|trans }}">
                 {% endif %}
@@ -40,14 +40,19 @@
 
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('item_form') }}">
 
-                <button type="submit">{{ (isEdit ? 'Save changes' : 'Add item')|trans }}</button>
+                {% if not isEdit %}
+                    <button type="submit">{{ 'Add item'|trans }}</button>
+                {% endif %}
             </form>
 
             {% if isEdit %}
-                <form method="post" action="{{ deleteAction }}" onsubmit="return confirm('{{ 'Are you sure you want to delete this item?'|trans|e('js') }}');">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete_item_' ~ itemId) }}">
-                    <button type="submit" class="item-card__delete">{{ 'Delete'|trans }}</button>
-                </form>
+                <div class="item-form__actions">
+                    <button type="submit" form="item-form" class="item-form__save">{{ 'Save changes'|trans }}</button>
+                    <form method="post" action="{{ deleteAction }}" class="item-form__delete-form" onsubmit="return confirm('{{ 'Are you sure you want to delete this item?'|trans|e('js') }}');">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete_item_' ~ itemId) }}">
+                        <button type="submit" class="item-card__delete">{{ 'Delete'|trans }}</button>
+                    </form>
+                </div>
             {% endif %}
 
             <p class="auth-switch"><a href="{{ path('household_items_index') }}">{{ 'Back to My Items'|trans }}</a></p>

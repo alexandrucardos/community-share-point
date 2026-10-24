@@ -246,7 +246,8 @@ body {
     resize: vertical;
 }
 
-.auth-form button {
+.auth-form button,
+.item-form__save {
     margin-top: 1.25rem;
     padding: 0.6rem;
     border: none;
@@ -257,8 +258,31 @@ body {
     cursor: pointer;
 }
 
-.auth-form button:hover {
+.auth-form button:hover,
+.item-form__save:hover {
     background: #1d4ed8;
+}
+
+.item-form__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.item-form__save {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-top: 0 !important;
+}
+
+.item-form__delete-form {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.item-form__delete-form .item-card__delete {
+    margin-top: 0;
 }
 
 .item-card__delete {
@@ -266,7 +290,6 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    margin-top: 1rem;
     padding: 0.55rem 0.85rem;
     border: 1px solid #dc2626;
     border-radius: 0.5rem;
@@ -444,12 +467,24 @@ body {
     font-size: 0.78rem;
 }
 
+.item-card__actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.item-card__actions form {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
 .item-card__edit {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    margin-top: 0.75rem;
     padding: 0.55rem 0.85rem;
     border: 1px solid #2563eb;
     border-radius: 0.5rem;
