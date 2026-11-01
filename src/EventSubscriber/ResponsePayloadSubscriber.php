@@ -27,6 +27,9 @@ final class ResponsePayloadSubscriber implements EventSubscriberInterface
         '_password_confirmation',
         '_csrf_token',
         'current_password',
+        // Login codes: the form field and the prefilled ?code= from the email.
+        '_code',
+        'code',
         'new_password',
         'new_password_confirmation'
     ];

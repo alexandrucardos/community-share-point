@@ -1,5 +1,7 @@
 {{ 'Your login code is:'|trans }} {{ code }}
 
-{{ 'It expires at %time%.'|trans({'%time%': expiresAt|date('H:i')}) }}
+{% if verifyUrl %}{{ 'Open the login page with the code filled in:'|trans }} {{ verifyUrl }}
+
+{% endif %}{{ 'It expires at %time%.'|trans({'%time%': expiresAt|date('H:i')}) }}
 
 {{ 'If you did not try to log in, you can ignore this email.'|trans }}

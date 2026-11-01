@@ -98,3 +98,5 @@ item:
 "Your login code is:": "Codul tău de autentificare este:"
 "It expires at %time%.": "Expiră la ora %time%."
 "If you did not try to log in, you can ignore this email.": "Dacă nu ai încercat să te autentifici, poți ignora acest email."
+"Open the login page with the code filled in": "Deschide pagina de autentificare cu codul deja completat"
+"Open the login page with the code filled in:": "Deschide pagina de autentificare cu codul deja completat:"
