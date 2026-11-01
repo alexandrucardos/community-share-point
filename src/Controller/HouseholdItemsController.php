@@ -43,16 +43,23 @@ final class HouseholdItemsController extends AbstractController
     }
 
     #[Route('/items/group', name: 'household_items_group', methods: ['GET'])]
-    public function group(string $uuid, ListGroupItemsHandler $listGroupItemsHandler): Response
+    public function group(string $uuid, Request $request, ListGroupItemsHandler $listGroupItemsHandler): Response
     {
         $securityUser = $this->getUser();
         $currentUserId = $securityUser instanceof SecurityUser
             ? $securityUser->getUserView()->id
             : null;
 
+        $name = $request->query->get('name');
+        $name = is_string($name) ? trim($name) : '';
+
         return $this->render('household_items/group.html.twig', [
-            'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery($uuid)),
+            'items' => $listGroupItemsHandler->handle(new ListGroupItemsQuery(
+                $uuid,
+                $name === '' ? null : $name,
+            )),
             'currentUserId' => $currentUserId,
+            'name' => $name,
         ]);
     }
 

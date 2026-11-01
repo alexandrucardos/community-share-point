@@ -38,14 +38,14 @@ final class ItemQueryRepositoryAdaptor implements ItemQueryRepositoryInterface
         );
     }
 
-    public function findAllForGroup(string $groupId): array
+    public function findAllForGroup(string $groupId, ?string $name = null): array
     {
         $contactInfoByUserId = [];
         foreach ($this->users->findByGroupId($groupId) as $user) {
             $contactInfoByUserId[$user->id] = $user->contactInfo;
         }
 
-        $records = $this->items->findByUserIds(array_keys($contactInfoByUserId));
+        $records = $this->items->findByUserIds(array_keys($contactInfoByUserId), $name);
 
         return array_map(
             fn(Item $record): GroupItemView => new GroupItemView(

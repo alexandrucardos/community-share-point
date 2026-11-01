@@ -17,7 +17,9 @@ interface ItemQueryRepositoryInterface
     ): array;
 
     /**
+     * @param string|null $name Case-insensitive item-name filter; null lists every item.
+     *
      * @return GroupItemView[]
      */
-    public function findAllForGroup(string $groupId): array;
+    public function findAllForGroup(string $groupId, ?string $name = null): array;
 }

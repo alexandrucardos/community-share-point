@@ -3,13 +3,47 @@
 {% block title %}All Items{% endblock %}
 
 {% block body %}
-    <main class="items-page">
+    <main class="items-page" data-controller="items-search">
         <div class="items-page__header">
             <h1>{{ 'All Items'|trans }}</h1>
+
+            <button type="button" class="items-search-toggle"
+                    aria-label="{{ 'Search items'|trans }}"
+                    aria-controls="items-filter"
+                    aria-expanded="{{ name is not empty ? 'true' : 'false' }}"
+                    data-items-search-target="button"
+                    data-action="items-search#toggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
+                </svg>
+            </button>
         </div>
 
+        {# Collapsed until the magnifier is clicked; stays open when a filter is applied. #}
+        <form class="items-filter" id="items-filter" method="get" action="{{ path('household_items_group') }}"
+              {% if name is empty %}hidden{% endif %}
+              data-items-search-target="field" data-action="keydown.esc->items-search#close">
+            <label class="items-filter__label" for="item-name-filter">{{ 'Filter by name'|trans }}</label>
+            <input class="items-filter__input" id="item-name-filter" type="search" name="name"
+                   value="{{ name }}" placeholder="{{ 'Search items'|trans }}"
+                   data-items-search-target="input">
+            <button class="button items-filter__submit" type="submit">{{ 'Filter'|trans }}</button>
+
+            {% if name is not empty %}
+                <a class="items-filter__clear" href="{{ path('household_items_group') }}">{{ 'Clear'|trans }}</a>
+            {% endif %}
+        </form>
+
         {% if items is empty %}
-            <p class="items-empty">{{ 'No items have been shared yet.'|trans }}</p>
+            <p class="items-empty">
+                {% if name is not empty %}
+                    {{ 'No items match "%name%".'|trans({'%name%': name}) }}
+                {% else %}
+                    {{ 'No items have been shared yet.'|trans }}
+                {% endif %}
+            </p>
         {% else %}
             <div class="items-grid">
                 {% for item in items %}

@@ -60,16 +60,28 @@ final class ItemRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param string[] $userIds
+     * @param string[]    $userIds
+     * @param string|null $name    Case-insensitive item-name filter; null/blank lists every item.
      *
      * @return Item[]
      */
-    public function findByUserIds(array $userIds): array
+    public function findByUserIds(array $userIds, ?string $name = null): array
     {
         if ($userIds === []) {
             return [];
         }
 
-        return $this->findBy(['userId' => array_values($userIds)]);
+        $builder = $this->createQueryBuilder('item')
+            ->andWhere('item.userId IN (:userIds)')
+            ->setParameter('userIds', array_values($userIds));
+
+        $name = trim((string) $name);
+
+        if ($name !== '') {
+            $builder->andWhere('LOWER(item.name) LIKE :name')
+                ->setParameter('name', '%'.mb_strtolower($name).'%');
+        }
+
+        return $builder->getQuery()->getResult();
     }
 }

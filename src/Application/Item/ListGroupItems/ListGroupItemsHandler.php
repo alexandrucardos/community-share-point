@@ -18,6 +18,6 @@ final class ListGroupItemsHandler
      */
     public function handle(ListGroupItemsQuery $query): array
     {
-        return $this->items->findAllForGroup($query->groupId);
+        return $this->items->findAllForGroup($query->groupId, $query->name);
     }
 }
