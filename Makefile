@@ -1,5 +1,5 @@
 PROJECT_NAME := community-sharepoint
-ZIP_NAME := $(PROJECT_NAME)-v10.zip
+ZIP_NAME := $(PROJECT_NAME)-v11.2.zip
 
 all: install assets zip
 
@@ -23,6 +23,7 @@ zip:
 		--exclude=node_modules \
 		--exclude=var/cache \
 		--exclude=var/log \
+		--exclude=var/data \
 		--exclude=$(ZIP_NAME)
 
 	cd /tmp && zip -r $(ZIP_NAME) $(PROJECT_NAME)
