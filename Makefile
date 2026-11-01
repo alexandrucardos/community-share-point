@@ -1,4 +1,4 @@
-PROJECT_NAME := public_html
+PROJECT_NAME := community-sharepoint
 ZIP_NAME := $(PROJECT_NAME)-v10.zip
 
 all: install assets zip
