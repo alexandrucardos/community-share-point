@@ -71,8 +71,16 @@ final class AuthController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        // The code is prefilled when the login page is opened from the email link.
+        $code = (string) $request->query->get('code', '');
+
+        if (preg_match('/^\d{6}$/', $code) !== 1) {
+            $code = '';
+        }
+
         return $this->render('auth/login_verify.html.twig', [
             'email' => $email,
+            'code' => $code,
             'error' => $authenticationUtils->getLastAuthenticationError(),
         ]);
     }
