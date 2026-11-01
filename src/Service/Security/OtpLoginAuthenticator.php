@@ -8,9 +8,9 @@ use App\Application\User\GetUser\UserView;
 use App\Application\User\GetUserByEmailAndGroup\GetUserByEmailAndGroupHandler;
 use App\Application\User\GetUserByEmailAndGroup\GetUserByEmailAndGroupQuery;
 use App\Application\User\GetUserByEmailAndGroup\UserCredentialsView;
-use App\Application\User\VerifyLoginOtp\InvalidLoginOtpException;
 use App\Application\User\VerifyLoginOtp\VerifyLoginOtpCommand;
 use App\Application\User\VerifyLoginOtp\VerifyLoginOtpHandler;
+use App\Domain\User\Exception\InvalidLoginOtpException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,9 +41,10 @@ final class OtpLoginAuthenticator extends AbstractLoginFormAuthenticator
 
     public function __construct(
         private readonly GetUserByEmailAndGroupHandler $loadUserByEmailAndGroup,
-        private readonly VerifyLoginOtpHandler $verifyLoginOtp,
-        private readonly UrlGeneratorInterface $urlGenerator,
-    ) {
+        private readonly VerifyLoginOtpHandler         $verifyLoginOtp,
+        private readonly UrlGeneratorInterface         $urlGenerator,
+    )
+    {
     }
 
     public function supports(Request $request): bool
@@ -53,9 +54,9 @@ final class OtpLoginAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $email = (string) $request->getSession()->get(self::SESSION_EMAIL, '');
-        $code = trim((string) $request->request->get('_code', ''));
-        $csrfToken = (string) $request->request->get('_csrf_token', '');
+        $email = (string)$request->getSession()->get(self::SESSION_EMAIL, '');
+        $code = trim((string)$request->request->get('_code', ''));
+        $csrfToken = (string)$request->request->get('_csrf_token', '');
         $groupId = $this->groupId($request);
 
         if ($email === '') {
@@ -65,14 +66,14 @@ final class OtpLoginAuthenticator extends AbstractLoginFormAuthenticator
         $sessionUser = $this->toSessionUser($this->loadUser($email, $groupId));
 
         return new Passport(
-            new UserBadge($sessionUser->id, static fn (): SecurityUser => new SecurityUser($sessionUser)),
+            new UserBadge($sessionUser->id, static fn(): SecurityUser => new SecurityUser($sessionUser)),
             new CustomCredentials(
                 function (mixed $credentials) use ($email, $groupId): bool {
                     try {
                         $this->verifyLoginOtp->handle(new VerifyLoginOtpCommand(
                             email: $email,
                             groupId: $groupId,
-                            code: (string) $credentials,
+                            code: (string)$credentials,
                         ));
                     } catch (InvalidLoginOtpException) {
                         throw new CustomUserMessageAuthenticationException(
@@ -137,7 +138,7 @@ final class OtpLoginAuthenticator extends AbstractLoginFormAuthenticator
 
     private function groupId(Request $request): string
     {
-        return (string) $request->attributes->get('uuid', '');
+        return (string)$request->attributes->get('uuid', '');
     }
 
     private function loadUser(string $email, string $groupId): UserCredentialsView

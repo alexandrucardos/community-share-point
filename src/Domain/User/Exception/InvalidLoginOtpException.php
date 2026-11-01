@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\User\VerifyLoginOtp;
+namespace App\Domain\User\Exception;
 
 final class InvalidLoginOtpException extends \RuntimeException
 {

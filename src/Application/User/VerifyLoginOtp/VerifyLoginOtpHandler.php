@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\User\VerifyLoginOtp;
 
+use App\Domain\User\Exception\InvalidLoginOtpException;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
@@ -18,7 +19,8 @@ final class VerifyLoginOtpHandler
     public function __construct(
         private readonly UserRepositoryInterface $userRepository,
         private readonly ValidatorInterface      $validator,
-    ) {
+    )
+    {
     }
 
     public function handle(VerifyLoginOtpCommand $command): void

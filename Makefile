@@ -1,5 +1,5 @@
 PROJECT_NAME := public_html
-ZIP_NAME := $(PROJECT_NAME)-v9.zip
+ZIP_NAME := $(PROJECT_NAME)-v10.zip
 
 all: install assets zip
 
