@@ -21,9 +21,6 @@ class User
     #[ORM\Column(type: 'string')]
     public string $email;
 
-    #[ORM\Column(type: 'string')]
-    public string $password;
-
     #[ORM\Column(name: 'contact_info', type: 'string')]
     public string $contactInfo;
 

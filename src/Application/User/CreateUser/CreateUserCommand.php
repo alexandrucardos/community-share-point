@@ -8,7 +8,6 @@ final class CreateUserCommand
 {
     public function __construct(
         public readonly string $email,
-        public readonly string $plainPassword,
         public readonly string $contactInfo,
         public readonly string $groupId,
     ) {

@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Tests\Repository\Adaptor;
 
+use App\Domain\User\LoginOtpEntity;
 use App\Domain\User\UserEntity;
 use App\Domain\ValueObject\ContactInfoValueObject;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
+use App\Entity\LoginOtp;
 use App\Entity\User;
 use App\Repository\Adaptor\UserRepositoryAdaptor;
+use App\Repository\LoginOtpRepository;
 use App\Repository\UserRepository;
 use App\Service\ValidationService\ValidatorService;
 use Doctrine\DBAL\Types\Type;
@@ -60,6 +63,7 @@ final class UserRepositoryAdaptorTest extends TestCase
 
         $this->repository = new UserRepositoryAdaptor(
             new UserRepository($this->registry),
+            new LoginOtpRepository($this->registry),
             $this->validator,
         );
     }
@@ -86,7 +90,6 @@ final class UserRepositoryAdaptorTest extends TestCase
         self::assertNotNull($found);
         self::assertSame('11111111-1111-4111-8111-111111111111', $found->getId()->value);
         self::assertSame('jane.doe@example.com', $found->getEmail()->value);
-        self::assertSame('hashed-password', $found->getHashedPassword());
         self::assertSame('+40 700 000 000', $found->getContactInfo()->value);
         self::assertSame(self::GROUP_ID, $found->getGroupId()->value);
     }
@@ -144,16 +147,124 @@ final class UserRepositoryAdaptorTest extends TestCase
         $record = $entityManager->find(User::class, '33333333-3333-4333-8333-333333333333');
         self::assertNotNull($record);
         self::assertSame('persisted@example.com', $record->email);
-        self::assertSame('hashed-password', $record->password);
         self::assertSame('+40 700 000 000', $record->contactInfo);
         self::assertSame(self::GROUP_ID, $record->groupId);
+    }
+
+    public function testAddLoginOtpThenFindLatestValidLoginOtpReturnsIt(): void
+    {
+        $this->repository->addLoginOtp($this->buildOtp('44444444-4444-4444-8444-444444444444', '123456'));
+
+        $found = $this->repository->findLatestValidLoginOtp(
+            $this->email('john.doe@example.com'),
+            $this->uuid(self::GROUP_ID),
+            new \DateTimeImmutable(),
+        );
+
+        self::assertNotNull($found);
+        self::assertSame('44444444-4444-4444-8444-444444444444', $found->getId()->value);
+        self::assertSame('john.doe@example.com', $found->getEmail()->value);
+        self::assertSame(self::GROUP_ID, $found->getGroupId()->value);
+        self::assertFalse($found->isUsed());
+        self::assertTrue($found->matches('123456', new \DateTimeImmutable()));
+    }
+
+    public function testFindLatestValidLoginOtpIgnoresExpiredCodes(): void
+    {
+        $this->repository->addLoginOtp($this->buildOtp('44444444-4444-4444-8444-444444444444', '123456', '-11 minutes'));
+
+        self::assertNull($this->repository->findLatestValidLoginOtp(
+            $this->email('john.doe@example.com'),
+            $this->uuid(self::GROUP_ID),
+            new \DateTimeImmutable(),
+        ));
+    }
+
+    public function testFindLatestValidLoginOtpIgnoresCodesFromAnotherGroup(): void
+    {
+        $this->repository->addLoginOtp($this->buildOtp('44444444-4444-4444-8444-444444444444', '123456'));
+
+        self::assertNull($this->repository->findLatestValidLoginOtp(
+            $this->email('john.doe@example.com'),
+            $this->uuid('99999999-9999-4999-8999-999999999999'),
+            new \DateTimeImmutable(),
+        ));
+    }
+
+    public function testUpdateLoginOtpAfterMarkUsedMakesTheCodeUnusable(): void
+    {
+        $this->repository->addLoginOtp($this->buildOtp('44444444-4444-4444-8444-444444444444', '123456'));
+
+        $found = $this->repository->findLatestValidLoginOtp(
+            $this->email('john.doe@example.com'),
+            $this->uuid(self::GROUP_ID),
+            new \DateTimeImmutable(),
+        );
+        self::assertNotNull($found);
+
+        $found->markUsed(new \DateTimeImmutable());
+        $this->repository->updateLoginOtp($found);
+
+        self::assertNull($this->repository->findLatestValidLoginOtp(
+            $this->email('john.doe@example.com'),
+            $this->uuid(self::GROUP_ID),
+            new \DateTimeImmutable(),
+        ));
+    }
+
+    public function testIssuingANewCodeInvalidatesThePendingOne(): void
+    {
+        $this->repository->addLoginOtp($this->buildOtp('44444444-4444-4444-8444-444444444444', '111111'));
+
+        $this->repository->invalidatePendingLoginOtps(
+            $this->email('john.doe@example.com'),
+            $this->uuid(self::GROUP_ID),
+            new \DateTimeImmutable(),
+        );
+
+        $this->repository->addLoginOtp($this->buildOtp('55555555-5555-4555-8555-555555555555', '222222'));
+
+        $found = $this->repository->findLatestValidLoginOtp(
+            $this->email('john.doe@example.com'),
+            $this->uuid(self::GROUP_ID),
+            new \DateTimeImmutable(),
+        );
+
+        self::assertNotNull($found);
+        self::assertTrue($found->matches('222222', new \DateTimeImmutable()));
+        self::assertFalse($found->matches('111111', new \DateTimeImmutable()));
+    }
+
+    public function testStoredLoginOtpRowKeepsTheClearCodeOut(): void
+    {
+        $entityManager = $this->registry->getManagerForClass(LoginOtp::class);
+
+        $this->repository->addLoginOtp($this->buildOtp('44444444-4444-4444-8444-444444444444', '123456'));
+
+        /** @var LoginOtp|null $row */
+        $row = $entityManager->find(LoginOtp::class, '44444444-4444-4444-8444-444444444444');
+        self::assertNotNull($row);
+        self::assertSame('john.doe@example.com', $row->email);
+        self::assertSame(self::GROUP_ID, $row->groupId);
+        self::assertNotSame('123456', $row->hashedCode);
+        self::assertNull($row->usedAt);
+    }
+
+    private function buildOtp(string $id, string $code, string $issuedAt = 'now'): LoginOtpEntity
+    {
+        return LoginOtpEntity::issue(
+            $this->uuid($id),
+            $this->email('john.doe@example.com'),
+            $this->uuid(self::GROUP_ID),
+            $code,
+            new \DateTimeImmutable($issuedAt),
+        );
     }
 
     private function buildUser(string $id, string $email): UserEntity
     {
         $user = new UserEntity($this->uuid($id));
         $user->setEmail($this->email($email));
-        $user->setHashedPassword('hashed-password');
         $user->setContactInfo((new ContactInfoValueObject($this->validator))('+40 700 000 000'));
         $user->setGroupId($this->uuid(self::GROUP_ID));
 

@@ -184,7 +184,6 @@ final class PersistDomainEventSubscriberTest extends TestCase
     {
         return new SecurityUser(new UserView(
             id: $id,
-            hashedPassword: 'hashed-password',
             contactInfo: '+40 700 000 000',
             email: 'actor@example.com',
             groupId: '44444444-4444-4444-8444-444444444444',

@@ -1,8 +1,4 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
-    password_hashers:
-        App\Service\Security\SecurityUser: 'auto'
-
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         app_user_provider:
@@ -16,8 +12,8 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            custom_authenticator: App\Service\Security\LoginFormAuthenticator
-            entry_point: App\Service\Security\LoginFormAuthenticator
+            custom_authenticator: App\Service\Security\OtpLoginAuthenticator
+            entry_point: App\Service\Security\OtpLoginAuthenticator
 
             # No target: App\Service\Security\LogoutRedirectSubscriber redirects
             # to /group/{uuid}/login using the logged-out user's group.
@@ -41,13 +37,3 @@ security:
         - { path: ^/group/[^/]+/items, roles: ROLE_USER }
         - { path: ^/group/[^/]+/request-log, roles: ROLE_ADMIN }
 
-when@test:
-    security:
-        password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
-            App\Service\Security\SecurityUser:
-                algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon

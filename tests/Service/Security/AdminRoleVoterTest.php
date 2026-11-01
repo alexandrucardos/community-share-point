@@ -33,7 +33,6 @@ final class AdminRoleVoterTest extends TestCase
     {
         $user = new SecurityUser(new UserView(
             id: 'user-id',
-            hashedPassword: 'hash',
             contactInfo: 'contact',
             email: $email,
             groupId: 'group-id',

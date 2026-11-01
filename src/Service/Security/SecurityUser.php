@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Service\Security;
 
 use App\Application\User\GetUser\UserView;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface
+final class SecurityUser implements UserInterface
 {
     public function __construct(
         private readonly UserView $loadUserDto,
@@ -23,11 +22,6 @@ final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInte
     public function getRoles(): array
     {
         return ['ROLE_USER'];
-    }
-
-    public function getPassword(): string
-    {
-        return $this->loadUserDto->hashedPassword;
     }
 
     public function eraseCredentials(): void

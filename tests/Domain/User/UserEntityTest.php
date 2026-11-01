@@ -61,11 +61,4 @@ final class UserEntityTest extends TestCase
 
         self::assertSame($email, $this->entity->getEmail());
     }
-
-    public function testHashedPasswordRoundTripsThroughSetterAndGetter(): void
-    {
-        $this->entity->setHashedPassword('hashed-secret');
-
-        self::assertSame('hashed-secret', $this->entity->getHashedPassword());
-    }
 }

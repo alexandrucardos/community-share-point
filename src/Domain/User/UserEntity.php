@@ -11,7 +11,6 @@ final class UserEntity
     private ContactInfoValueObject $contactInfo;
     private UuidValueObject $groupId;
     private EmailValueObject $email;
-    private string $hashedPassword;
 
     public function __construct(
         private readonly UuidValueObject $id,
@@ -54,13 +53,4 @@ final class UserEntity
         $this->email = $email;
     }
 
-    public function getHashedPassword(): string
-    {
-        return $this->hashedPassword;
-    }
-
-    public function setHashedPassword(string $hashedPassword): void
-    {
-        $this->hashedPassword = $hashedPassword;
-    }
 }

@@ -8,7 +8,6 @@ use App\Application\User\CreateUser\CreateUserCommand;
 use App\Application\User\CreateUser\CreateUserHandler;
 use App\Domain\Event\DomainEventPublisherInterface;
 use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
-use App\Domain\User\PasswordHasherInterface;
 use App\Domain\User\UserEntity;
 use App\Domain\User\UserRepositoryInterface;
 use App\Domain\UuidInterface;
@@ -27,14 +26,12 @@ final class CreateUserHandlerTest extends TestCase
     private const GROUP_ID = '11111111-1111-4111-8111-111111111111';
 
     private UserRepositoryInterface&MockObject $userRepository;
-    private PasswordHasherInterface&Stub $passwordHasher;
     private ValidatorService $validator;
     private CreateUserHandler $handler;
 
     protected function setUp(): void
     {
         $this->userRepository = $this->createMock(UserRepositoryInterface::class);
-        $this->passwordHasher = $this->createStub(PasswordHasherInterface::class);
 
         $this->validator = new ValidatorService($this->createTranslator());
 
@@ -43,24 +40,21 @@ final class CreateUserHandlerTest extends TestCase
 
         $this->handler = new CreateUserHandler(
             $this->userRepository,
-            $this->passwordHasher,
             $this->validator,
             $uuid,
             $this->createMock(DomainEventPublisherInterface::class),
         );
     }
 
-    public function testHandleAddsUserWithHashedPasswordWhenDataIsValid(): void
+    public function testHandleAddsUserWhenDataIsValid(): void
     {
         $this->userRepository->method('findByEmailAndGroupId')->willReturn(null);
-        $this->passwordHasher->method('hash')->willReturn('hashed-password');
 
         $this->userRepository->expects($this->once())
             ->method('add')
             ->with($this->callback(function (UserEntity $user): bool {
                 self::assertSame('john.doe@example.com', $user->getEmail()->value);
                 self::assertSame('+40 700 000 000', $user->getContactInfo()->value);
-                self::assertSame('hashed-password', $user->getHashedPassword());
                 self::assertSame('22222222-2222-4222-8222-222222222222', $user->getId()->value);
                 self::assertSame(self::GROUP_ID, $user->getGroupId()->value);
 
@@ -69,7 +63,6 @@ final class CreateUserHandlerTest extends TestCase
 
         $this->handler->handle(new CreateUserCommand(
             email: 'john.doe@example.com',
-            plainPassword: 'a-strong-password',
             contactInfo: '+40 700 000 000',
             groupId: self::GROUP_ID,
         ));
@@ -83,21 +76,6 @@ final class CreateUserHandlerTest extends TestCase
 
         $this->handler->handle(new CreateUserCommand(
             email: 'not-an-email',
-            plainPassword: 'a-strong-password',
-            contactInfo: '+40 700 000 000',
-            groupId: self::GROUP_ID,
-        ));
-    }
-
-    public function testHandleThrowsWhenPasswordIsTooShort(): void
-    {
-        $this->userRepository->expects($this->never())->method('add');
-
-        $this->expectException(\InvalidArgumentException::class);
-
-        $this->handler->handle(new CreateUserCommand(
-            email: 'john.doe@example.com',
-            plainPassword: 'short',
             contactInfo: '+40 700 000 000',
             groupId: self::GROUP_ID,
         ));
@@ -111,7 +89,6 @@ final class CreateUserHandlerTest extends TestCase
 
         $this->handler->handle(new CreateUserCommand(
             email: 'john.doe@example.com',
-            plainPassword: 'a-strong-password',
             contactInfo: '+40 700 000 000',
             groupId: 'not-a-uuid',
         ));
@@ -125,7 +102,6 @@ final class CreateUserHandlerTest extends TestCase
 
         $this->handler->handle(new CreateUserCommand(
             email: 'john.doe@example.com',
-            plainPassword: 'a-strong-password',
             contactInfo: '',
             groupId: self::GROUP_ID,
         ));
@@ -143,7 +119,6 @@ final class CreateUserHandlerTest extends TestCase
 
         $this->handler->handle(new CreateUserCommand(
             email: 'john.doe@example.com',
-            plainPassword: 'a-strong-password',
             contactInfo: '+40 700 000 000',
             groupId: self::GROUP_ID,
         ));

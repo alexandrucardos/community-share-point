@@ -35,7 +35,6 @@ final class UserRepository extends ServiceEntityRepository
             $manager->persist($record);
         } else {
             $existing->email = $record->email;
-            $existing->password = $record->password;
             $existing->contactInfo = $record->contactInfo;
             $existing->groupId = $record->groupId;
         }

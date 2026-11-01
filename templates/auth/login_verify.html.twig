@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Enter login code{% endblock %}
+
+{% block body %}
+    <main class="auth-page">
+        <div class="auth-card">
+            <h1>{{ 'Enter your login code'|trans }}</h1>
+
+            <p class="auth-hint">{{ 'We sent a code to %email%.'|trans({'%email%': email}) }}</p>
+
+            {% if error %}
+                <div class="auth-error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+
+            <form method="post" action="{{ path('app_login_verify') }}" class="auth-form">
+                <label for="code">{{ 'Login code'|trans }}</label>
+                <input type="text" id="code" name="_code" inputmode="numeric" autocomplete="one-time-code"
+                       pattern="[0-9]{6}" maxlength="6" required autofocus>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate_otp') }}">
+
+                <button type="submit">{{ 'Log in'|trans }}</button>
+            </form>
+
+            <p class="auth-switch"><a href="{{ path('app_login') }}">{{ 'Use a different email'|trans }}</a></p>
+        </div>
+    </main>
+{% endblock %}

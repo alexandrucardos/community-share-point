@@ -22,17 +22,6 @@
                 <label for="contactInfo">{{ 'Contact info'|trans }}</label>
                 <input type="text" id="contactInfo" name="contactInfo" value="{{ contactInfo }}" placeholder="{{ 'Phone number or address'|trans }}" required>
 
-                <hr>
-
-                <label for="new_password">{{ 'New password'|trans }}</label>
-                <input type="password" id="new_password" name="new_password" minlength="8" placeholder="{{ 'Leave blank to keep current password'|trans }}">
-
-                <label for="new_password_confirmation">{{ 'Confirm new password'|trans }}</label>
-                <input type="password" id="new_password_confirmation" name="new_password_confirmation" minlength="8">
-
-                <label for="current_password">{{ 'Current password'|trans }}</label>
-                <input type="password" id="current_password" name="current_password" required placeholder="{{ 'Required to save changes'|trans }}">
-
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('account_update') }}">
 
                 <button type="submit">{{ 'Save changes'|trans }}</button>

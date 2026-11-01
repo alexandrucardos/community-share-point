@@ -13,7 +13,6 @@ final class UserUpdatedEvent extends AbstractDomainEvent
         public readonly string $email,
         public readonly string $contactInfo,
         public readonly string $groupId,
-        public readonly bool $passwordChanged,
     ) {
         parent::__construct();
     }
@@ -40,7 +39,6 @@ final class UserUpdatedEvent extends AbstractDomainEvent
             'email' => $this->email,
             'contact_info' => $this->contactInfo,
             'group_id' => $this->groupId,
-            'password_changed' => $this->passwordChanged,
         ];
     }
 }

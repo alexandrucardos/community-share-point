@@ -40,7 +40,6 @@ final class UserQueryRepositoryAdaptor implements UserQueryRepositoryInterface
 
         return new UserCredentialsView(
             id: $record->id,
-            hashedPassword: $record->password,
             contactInfo: $record->contactInfo,
             email: $record->email,
             groupId: $record->groupId,
@@ -51,7 +50,6 @@ final class UserQueryRepositoryAdaptor implements UserQueryRepositoryInterface
     {
         return new UserView(
             id: $record->id,
-            hashedPassword: $record->password,
             contactInfo: $record->contactInfo,
             email: $record->email,
             groupId: $record->groupId,

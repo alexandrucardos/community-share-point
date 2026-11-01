@@ -80,3 +80,16 @@ item:
 "We're building a place for neighbours to lend and borrow items within their community.": "Construim un loc unde vecinii pot împrumuta și da cu împrumut lucruri în comunitatea lor."
 "The site is still under construction — please check back soon.": "Site-ul este încă în construcție — te rugăm să revii în curând."
 "Thanks for your patience.": "Îți mulțumim pentru răbdare."
+"An account with this email and group already exists.": "Exista un cont deja salvat."
+"If that email is registered in this group, a login code is on its way.": "A fost trimis codul de login pe adresa de email."
+"Send login code via email": "Trimite codul pe email"
+"Enter your login code": "Introdu codul primit pe email"
+"We sent a code to %email%.": "Am trimis codul la %email%."
+"Login code": 'Codul de login'
+"Use a different email": "Foloseste alt email"
+
+# Login code email (templates/email/login_otp.*.twig)
+"Your login code": "Codul tău de autentificare"
+"Your login code is:": "Codul tău de autentificare este:"
+"It expires at %time%.": "Expiră la ora %time%."
+"If you did not try to log in, you can ignore this email.": "Dacă nu ai încercat să te autentifici, poți ignora acest email."
