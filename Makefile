@@ -1,5 +1,5 @@
-PROJECT_NAME := community-sharepoint
-ZIP_NAME := $(PROJECT_NAME)-v7.zip
+PROJECT_NAME := public_html
+ZIP_NAME := $(PROJECT_NAME)-v9.zip
 
 all: install assets zip
 

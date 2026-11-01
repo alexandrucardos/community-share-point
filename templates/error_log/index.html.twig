@@ -1,0 +1,45 @@
+{#
+    Standalone page. It deliberately does NOT extend base.html.twig: that
+    layout's nav generates group-scoped URLs (path('app_login'), etc.) which
+    require a {uuid}. The error log is app-wide and has no group in its URL,
+    so this template stays self-contained (same approach as the 404 page).
+#}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ 'Error Log'|trans }}</title>
+        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+    </head>
+    <body>
+        <main class="error-log">
+            <h1>{{ 'Error Log'|trans }}</h1>
+
+            {% if errors is empty %}
+                <p class="error-log__empty">{{ 'No errors recorded.'|trans }}</p>
+            {% else %}
+                <table class="error-log__table">
+                    <thead>
+                    <tr>
+                        <th>{{ 'Date'|trans }}</th>
+                        <th>{{ 'Code'|trans }}</th>
+                        <th>{{ 'Message'|trans }}</th>
+                        <th>{{ 'Trace'|trans }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for error in errors %}
+                        <tr>
+                            <td>{{ error.created_at }}</td>
+                            <td>{{ error.code }}</td>
+                            <td>{{ error.message }}</td>
+                            <td><pre>{{ error.trace }}</pre></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </main>
+    </body>
+</html>

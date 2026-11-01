@@ -24,20 +24,26 @@ final class GroupUuidRouteContextListener implements EventSubscriberInterface
 {
     public function __construct(
         private readonly RouterInterface $router,
-    ) {
-    }
-
-    public function onKernelRequest(RequestEvent $event): void
+    )
     {
-        $uuid = $event->getRequest()->attributes->get('uuid');
-
-        if (is_string($uuid) && $uuid !== '') {
-            $this->router->getContext()->setParameter('uuid', $uuid);
-        }
     }
 
     public static function getSubscribedEvents(): array
     {
         return [KernelEvents::REQUEST => ['onKernelRequest', 20]];
+    }
+
+    public function onKernelRequest(RequestEvent $event): void
+    {
+        // The error log is app-wide and has no group {uuid}.
+        if ($event->getRequest()->attributes->get('_route') === 'error_log_index') {
+            return;
+        }
+
+        $uuid = $event->getRequest()->attributes->get('uuid');
+
+        if (is_string($uuid) && $uuid !== '') {
+            $this->router->getContext()->setParameter('uuid', $uuid);
+        }
     }
 }
