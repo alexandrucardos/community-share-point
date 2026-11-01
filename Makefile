@@ -1,5 +1,5 @@
 PROJECT_NAME := community-sharepoint
-ZIP_NAME := $(PROJECT_NAME)-v11.2.zip
+ZIP_NAME := $(PROJECT_NAME)-v14.zip
 
 all: install assets zip
 

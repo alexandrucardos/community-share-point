@@ -3,7 +3,10 @@ framework:
     secret: '%env(APP_SECRET)%'
 
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        # Sessions live in the database (see config/services.yaml) so they are
+        # shared across deploys and survive copying the code to another server.
+        handler_id: session.handler.pdo
 
     #esi: true
     #fragments: true

@@ -26,3 +26,16 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # PHP sessions are stored in the database instead of files on disk, so a
+    # deploy that copies the code to another server does not log everyone out.
+    # The handler connects lazily, only when a session is actually used.
+    # resolve: substitutes parameters such as %kernel.project_dir% used by the
+    # sqlite URL in .env.dev.
+    App\Service\Session\PdoSessionHandlerFactory:
+        arguments:
+            $databaseUrl: '%env(resolve:DATABASE_URL)%'
+
+    session.handler.pdo:
+        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
+        factory: ['@App\Service\Session\PdoSessionHandlerFactory', 'create']

@@ -174,3 +174,16 @@ CREATE TABLE error_log (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE INDEX idx_error_log_created_at ON error_log (created_at);
+
+
+-- ===========================================================================
+-- Version20261101150000 - Create sessions (database-backed PHP sessions)
+-- ===========================================================================
+CREATE TABLE sessions (
+    sess_id VARBINARY(128) NOT NULL,
+    sess_data BLOB NOT NULL,
+    sess_lifetime INT UNSIGNED NOT NULL,
+    sess_time INT UNSIGNED NOT NULL,
+    PRIMARY KEY (sess_id),
+    INDEX sess_lifetime_idx (sess_lifetime)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_bin;
