@@ -18,12 +18,15 @@
             {% endif %}
 
             <form method="post" action="{{ formAction }}" class="auth-form" enctype="multipart/form-data" id="item-form">
-                {% if currentImageUrl %}
-                    <img class="item-form-image" src="{{ currentImageUrl }}" alt="{{ 'Photo'|trans }}">
-                {% endif %}
+                <img id="image-preview" class="item-form-image"{% if currentImageUrl %} src="{{ currentImageUrl }}"{% else %} hidden{% endif %} alt="{{ 'Photo'|trans }}">
 
-                <label for="image">{{ 'Photo'|trans }}</label>
-                <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp" capture="environment">
+                <input class="photo-picker__input" type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp" capture="environment" hidden>
+                <label class="photo-picker" for="image" aria-label="{{ 'Photo'|trans }}">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 4h-4L8.5 6H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L14 4Z" />
+                        <circle cx="12" cy="13" r="3.5" />
+                    </svg>
+                </label>
 
                 <label for="name">{{ 'Name'|trans }}</label>
                 <input type="text" id="name" name="name" value="{{ name }}" required autofocus>

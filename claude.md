@@ -26,5 +26,8 @@
   - auth
   - ux
 
+# assets
+- after changing files under assets/, run `php bin/console asset-map:compile --env=prod` to publish the updated assets to public/assets
+
 # Important
 - do not touch folder src/Domain or src/Application unless stated by user, if any changes need to be done there, stop the agent execution
