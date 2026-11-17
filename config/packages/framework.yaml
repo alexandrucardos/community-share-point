@@ -7,8 +7,8 @@ framework:
         # Sessions live in the database (see config/services.yaml) so they are
         # shared across deploys and survive copying the code to another server.
         handler_id: session.handler.pdo
-        cookie_lifetime: 86400
-        gc_maxlifetime: 86400
+        cookie_lifetime: 604800 #7 days
+        gc_maxlifetime: 604800 #7 days
 
     #esi: true
     #fragments: true

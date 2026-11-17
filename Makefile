@@ -1,5 +1,5 @@
 PROJECT_NAME := community-sharepoint
-ZIP_NAME := $(PROJECT_NAME)-v19.zip
+ZIP_NAME := $(PROJECT_NAME)-v21.zip
 
 all: install assets zip
 
