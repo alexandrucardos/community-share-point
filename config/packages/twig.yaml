@@ -1,5 +1,7 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        suggestions_email: '%env(string:SUGGESTIONS_EMAIL)%'
 
 when@test:
     twig:
