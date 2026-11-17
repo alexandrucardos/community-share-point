@@ -34,25 +34,25 @@ final class LoginOtpEmailNotifier implements LoginOtpNotifierInterface
             ->context([
                 'code' => $code,
                 'expiresAt' => $expiresAt,
-                'verifyUrl' => $this->verifyUrl($code),
+                'verifyUrl' => $this->verifyUrl(),
             ]);
 
         $this->mailer->send($message);
     }
 
     /**
-     * Deep link to the code form with the code prefilled.
+     * Link to the code-entry form without exposing the OTP in the URL.
      *
      * The group {uuid} comes from the router context of the request that asked
      * for the code (see GroupUuidRouteContextListener). Without it — e.g. a
      * console context — the mail is sent without the link.
      */
-    private function verifyUrl(string $code): ?string
+    private function verifyUrl(): ?string
     {
         try {
             return $this->urlGenerator->generate(
                 'app_login_verify',
-                ['code' => $code],
+                [],
                 UrlGeneratorInterface::ABSOLUTE_URL,
             );
         } catch (RoutingExceptionInterface) {

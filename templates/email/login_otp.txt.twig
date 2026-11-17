@@ -1,6 +1,6 @@
 {{ 'Your login code is:'|trans }} {{ code }}
 
-{% if verifyUrl %}{{ 'Open the login page with the code filled in:'|trans }} {{ verifyUrl }}
+{% if verifyUrl %}{{ 'Open the login code entry page:'|trans }} {{ verifyUrl }}
 
 {% endif %}{{ 'It expires at %time%.'|trans({'%time%': expiresAt|date('H:i')}) }}
 

@@ -60,7 +60,7 @@ final class RequestResponsePayloadSubscriberTest extends TestCase
 
     public function testResponseSubscriberPersistsOnePairedRecord(): void
     {
-        $request = Request::create('/items?search=drill', 'POST', ['name' => 'Drill', '_password' => 'secret']);
+        $request = Request::create('/items?search=drill&code=123456', 'POST', ['name' => 'Drill', '_password' => 'secret']);
         $request->attributes->set('_route', 'items_create');
 
         $response = new Response('{"id":"item-1","ok":true}', 201, ['Content-Type' => 'application/json']);
@@ -73,10 +73,11 @@ final class RequestResponsePayloadSubscriberTest extends TestCase
         self::assertInstanceOf(RequestResponseLog::class, $record);
         self::assertSame('POST', $record->method);
         self::assertSame('items_create', $record->route);
-        self::assertSame('/items?search=drill', $record->uri);
+        self::assertSame('/items', $record->uri);
         self::assertSame('Drill', $record->requestPayload['name']);
         self::assertSame('***', $record->requestPayload['_password']);
         self::assertSame('drill', $record->requestPayload['search']);
+        self::assertSame('***', $record->requestPayload['code']);
         self::assertSame(['id' => 'item-1', 'ok' => true], $record->responsePayload);
         self::assertSame(201, $record->status);
         self::assertSame('application/json', $record->contentType);
