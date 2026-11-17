@@ -13,14 +13,12 @@ final class ItemStatusTest extends TestCase
     {
         self::assertSame('Available', ItemStatus::Available->value);
         self::assertSame('Reserved', ItemStatus::Reserved->value);
-        self::assertSame('Deleted', ItemStatus::Deleted->value);
     }
 
     public function testFromValidValueReturnsMatchingCase(): void
     {
         self::assertSame(ItemStatus::Available, ItemStatus::from('Available'));
         self::assertSame(ItemStatus::Reserved, ItemStatus::from('Reserved'));
-        self::assertSame(ItemStatus::Deleted, ItemStatus::from('Deleted'));
     }
 
     public function testFromInvalidValueThrowsValueError(): void
@@ -38,7 +36,7 @@ final class ItemStatusTest extends TestCase
 
     public function testCasesContainsExactlyThreeStatuses(): void
     {
-        self::assertCount(3, ItemStatus::cases());
+        self::assertCount(2, ItemStatus::cases());
         self::assertContainsOnlyInstancesOf(ItemStatus::class, ItemStatus::cases());
     }
 }

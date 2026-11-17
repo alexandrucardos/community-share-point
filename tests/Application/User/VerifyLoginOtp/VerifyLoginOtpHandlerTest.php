@@ -9,7 +9,7 @@ use App\Domain\User\UserRepositoryInterface;
 use App\Domain\ValueObject\EmailValueObject;
 use App\Domain\ValueObject\UuidValueObject;
 use App\Domain\ValueObject\ValidatorInterface;
-use App\Application\User\VerifyLoginOtp\InvalidLoginOtpException;
+use App\Domain\User\Exception\InvalidLoginOtpException;
 use App\Application\User\VerifyLoginOtp\VerifyLoginOtpCommand;
 use App\Application\User\VerifyLoginOtp\VerifyLoginOtpHandler;
 use App\Service\ValidationService\ValidatorService;
