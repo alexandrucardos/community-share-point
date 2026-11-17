@@ -23,7 +23,7 @@
                 {% endif %}
 
                 <label for="image">{{ 'Photo'|trans }}</label>
-                <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp">
+                <input type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp" capture="environment">
 
                 <label for="name">{{ 'Name'|trans }}</label>
                 <input type="text" id="name" name="name" value="{{ name }}" required autofocus>
