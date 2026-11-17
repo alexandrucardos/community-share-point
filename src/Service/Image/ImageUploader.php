@@ -55,6 +55,12 @@ final class ImageUploader
         }
 
         try {
+            $orientedImage = $this->applyOrientation($image, $contents, $item->getFileExtension());
+            if ($orientedImage !== $image) {
+                imagedestroy($image);
+                $image = $orientedImage;
+            }
+
             $thumbnail = $this->resize($image, $item->getFileSize());
 
             // Preserve transparency for formats that support it.
@@ -78,6 +84,68 @@ final class ImageUploader
             'Body' => $body,
             'ContentType' => $this->contentType($item->getFileExtension()),
         ])->resolve();
+    }
+
+    private function applyOrientation(\GdImage $image, string $contents, FileExtension $extension): \GdImage
+    {
+        if (!in_array($extension, [FileExtension::jpg, FileExtension::jpeg], true)
+            || !function_exists('exif_read_data')
+        ) {
+            return $image;
+        }
+
+        $temporaryFile = tempnam(sys_get_temp_dir(), 'image-exif-');
+
+        if (false === $temporaryFile) {
+            throw new \RuntimeException('Unable to read the uploaded image orientation.');
+        }
+
+        try {
+            if (false === file_put_contents($temporaryFile, $contents)) {
+                throw new \RuntimeException('Unable to read the uploaded image orientation.');
+            }
+
+            $metadata = @exif_read_data($temporaryFile);
+            $orientation = is_array($metadata) ? (int) ($metadata['Orientation'] ?? 1) : 1;
+        } finally {
+            unlink($temporaryFile);
+        }
+
+        return match ($orientation) {
+            2 => $this->flip($image, IMG_FLIP_HORIZONTAL),
+            3 => $this->rotate($image, 180),
+            4 => $this->flip($image, IMG_FLIP_VERTICAL),
+            5 => $this->rotateAndFlip($image, 90, IMG_FLIP_VERTICAL),
+            6 => $this->rotate($image, -90),
+            7 => $this->rotateAndFlip($image, 90, IMG_FLIP_HORIZONTAL),
+            8 => $this->rotate($image, 90),
+            default => $image,
+        };
+    }
+
+    private function rotate(\GdImage $image, int $angle): \GdImage
+    {
+        $rotated = imagerotate($image, $angle, 0);
+
+        if (false === $rotated) {
+            throw new \RuntimeException('Unable to rotate the uploaded image.');
+        }
+
+        return $rotated;
+    }
+
+    private function rotateAndFlip(\GdImage $image, int $angle, int $mode): \GdImage
+    {
+        return $this->flip($this->rotate($image, $angle), $mode);
+    }
+
+    private function flip(\GdImage $image, int $mode): \GdImage
+    {
+        if (!imageflip($image, $mode)) {
+            throw new \RuntimeException('Unable to flip the uploaded image.');
+        }
+
+        return $image;
     }
 
     /**
