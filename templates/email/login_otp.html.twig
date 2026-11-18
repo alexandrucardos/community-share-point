@@ -7,9 +7,6 @@
     <body>
         <p>{{ 'Your login code is:'|trans }}</p>
         <p style="font-size: 1.75rem; font-weight: 700; letter-spacing: 0.3em;">{{ code }}</p>
-        {% if verifyUrl %}
-            <p><a href="{{ verifyUrl }}">{{ 'Open the login code entry page'|trans }}</a></p>
-        {% endif %}
         <p>{{ 'It expires at %time%.'|trans({'%time%': expiresAt|date('H:i')}) }}</p>
         <p>{{ 'If you did not try to log in, you can ignore this email.'|trans }}</p>
     </body>
