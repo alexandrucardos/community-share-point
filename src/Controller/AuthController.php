@@ -10,6 +10,7 @@ use App\Application\User\RequestLoginOtp\RequestLoginOtpCommand;
 use App\Application\User\RequestLoginOtp\RequestLoginOtpHandler;
 use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
 use App\Service\Security\OtpLoginAuthenticator;
+use App\Service\Security\OtpRateLimiter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ final class AuthController extends AbstractController
         string $uuid,
         Request $request,
         RequestLoginOtpHandler $requestLoginOtp,
+        OtpRateLimiter $otpRateLimiter,
         AuthenticationUtils $authenticationUtils,
     ): Response {
         if ($this->getUser() !== null) {
@@ -39,10 +41,12 @@ final class AuthController extends AbstractController
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
-                    $requestLoginOtp->handle(new RequestLoginOtpCommand(
-                        email: $email,
-                        groupId: $uuid,
-                    ));
+                    if ($otpRateLimiter->allowRequest($email, $uuid, $request->getClientIp())) {
+                        $requestLoginOtp->handle(new RequestLoginOtpCommand(
+                            email: $email,
+                            groupId: $uuid,
+                        ));
+                    }
 
                     $request->getSession()->set(OtpLoginAuthenticator::SESSION_EMAIL, $email);
 
