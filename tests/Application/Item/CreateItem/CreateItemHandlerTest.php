@@ -81,12 +81,12 @@ final class CreateItemHandlerTest extends TestCase
         ));
     }
 
-    public function testHandlePublishesTheStoredImageNameWhenAFileIsAttached(): void
+    public function testHandlePublishesTheGeneratedImageNameWhenAFileIsAttached(): void
     {
         $this->domainEventPublisher->expects($this->once())
             ->method('publish')
             ->with($this->callback(function (ItemCreatedEvent $event): bool {
-                self::assertSame('photo.png', $event->imageFilename);
+                self::assertSame(self::ITEM_ID.'.png', $event->imageFilename);
 
                 return true;
             }));
