@@ -39,6 +39,8 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
     public function update(ItemEntity $item): void
     {
         $record = $this->toRecord($item);
+        $existing = $this->records->find($item->getId()->value);
+        $oldFileName = $existing?->imageFilename ?? '';
 
         if ($item->isContainsFile() === true) {
             $this->imageUploader->upload($item);
@@ -49,6 +51,10 @@ final class ItemRepositoryAdaptor implements ItemRepositoryInterface
         $record->imageFilename = $item->getFileName();
 
         $this->records->save($record);
+
+        if ($item->isContainsFile() === true && $oldFileName !== '' && $oldFileName !== $item->getFileName()) {
+            $this->imageUploader->deleteByFileName($oldFileName);
+        }
     }
 
     public function findById(string $id): ?ItemEntity

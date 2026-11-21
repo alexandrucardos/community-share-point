@@ -12,6 +12,7 @@ use App\Entity\Item;
 use App\Repository\Adaptor\ItemRepositoryAdaptor;
 use App\Repository\ItemRepository;
 use App\Service\Image\ImageUploader;
+use App\Service\Image\ItemImageResolver;
 use App\Service\ValidationService\ValidatorService;
 use AsyncAws\S3\S3Client;
 use Doctrine\DBAL\Types\Type;
@@ -167,6 +168,80 @@ final class ItemRepositoryAdaptorTest extends TestCase
         self::assertSame('DELETE', $this->s3Requests[0]['method']);
         self::assertSame('/items/drill.png', parse_url($this->s3Requests[0]['url'], PHP_URL_PATH));
         self::assertStringContainsString('test-bucket', (string) parse_url($this->s3Requests[0]['url'], PHP_URL_HOST));
+    }
+
+    public function testUploadStoresImageUnderGeneratedFilenameInsteadOfClientFilename(): void
+    {
+        $id = 'a7777777-7777-4777-8777-777777777777';
+        $item = $this->buildItem($id, 'Drill');
+        $image = imagecreatetruecolor(2, 2);
+        ob_start();
+        imagepng($image);
+        $contents = ob_get_clean();
+        imagedestroy($image);
+
+        self::assertNotFalse($contents);
+        $item->setFileExtension('png');
+        $item->setFileName('../shared?#.png');
+        $item->setFileContent($contents);
+        $item->setContainsFile(true);
+
+        $this->repository->add($item);
+
+        $stored = $this->repository->findById($id);
+        self::assertNotNull($stored);
+        self::assertMatchesRegularExpression('/^[0-9a-f-]{36}\\.png$/', $stored->getFileName());
+        self::assertSame($stored->getFileName(), $item->getFileName());
+        self::assertCount(1, $this->s3Requests);
+        self::assertSame('/items/'.$stored->getFileName(), parse_url($this->s3Requests[0]['url'], PHP_URL_PATH));
+    }
+
+    public function testUpdateWithNewImageRemovesThePreviousObject(): void
+    {
+        $id = 'a8888888-8888-4888-8888-888888888888';
+        $this->repository->add($this->buildItem($id, 'Drill'));
+
+        $entityManager = $this->registry->getManagerForClass(Item::class);
+        /** @var Item $record */
+        $record = $entityManager->find(Item::class, $id);
+        $record->imageFilename = '99999999-9999-4999-8999-999999999999.png';
+        $entityManager->flush();
+
+        $item = $this->repository->findById($id);
+        self::assertNotNull($item);
+        $image = imagecreatetruecolor(2, 2);
+        ob_start();
+        imagepng($image);
+        $contents = ob_get_clean();
+        imagedestroy($image);
+
+        self::assertNotFalse($contents);
+        $item->setFileExtension('png');
+        $item->setFileName('../new-image.png');
+        $item->setFileContent($contents);
+        $item->setContainsFile(true);
+
+        $this->repository->update($item);
+
+        $stored = $this->repository->findById($id);
+        self::assertNotNull($stored);
+        self::assertMatchesRegularExpression('/^[0-9a-f-]{36}\\.png$/', $stored->getFileName());
+        self::assertCount(2, $this->s3Requests);
+        self::assertSame('PUT', $this->s3Requests[0]['method']);
+        self::assertSame('DELETE', $this->s3Requests[1]['method']);
+        self::assertSame('/items/99999999-9999-4999-8999-999999999999.png', parse_url($this->s3Requests[1]['url'], PHP_URL_PATH));
+    }
+
+    public function testImageResolverEncodesTheFilenameAsOnePathSegment(): void
+    {
+        $resolver = new ItemImageResolver('test-bucket', 'us-east-1', 'items');
+
+        $url = $resolver->url('shared name?#.png', 'Drill');
+
+        self::assertSame(
+            '/items/shared%20name%3F%23.png',
+            parse_url($url, PHP_URL_PATH),
+        );
     }
 
     public function testDeleteWithoutAnImageOnlyRemovesTheDatabaseRecord(): void
