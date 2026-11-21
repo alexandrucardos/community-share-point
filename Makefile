@@ -37,3 +37,6 @@ clean:
 
 test-coverage:
 	XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html var/tests-coverage
+
+ngrok-up:
+	ngrok http --host-header=comm.localhost 80
