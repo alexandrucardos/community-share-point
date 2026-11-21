@@ -100,6 +100,15 @@ final class ItemEntityTest extends TestCase
         self::assertTrue($this->entity->isContainsFile());
     }
 
+    public function testSetContainsFileGeneratesTheFileNameFromTheItemIdAndExtension(): void
+    {
+        $this->entity->setFileExtension('png');
+        $this->entity->setFileName('../client-supplied.png');
+        $this->entity->setContainsFile(true);
+
+        self::assertSame('6f9c2f2e-1c3b-4d5e-8f7a-9b8c7d6e5f4a.png', $this->entity->getFileName());
+    }
+
     public function testSetFileExtensionAcceptsAllowedExtensionAndExposesEnumCase(): void
     {
         $this->entity->setFileExtension('png');

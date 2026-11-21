@@ -2,6 +2,24 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    rate_limiter:
+        otp_request_ip:
+            policy: fixed_window
+            limit: 10
+            interval: '1 hour'
+        otp_request_account:
+            policy: fixed_window
+            limit: 3
+            interval: '1 hour'
+        otp_verify_ip:
+            policy: fixed_window
+            limit: 30
+            interval: '15 minutes'
+        otp_verify_account:
+            policy: fixed_window
+            limit: 5
+            interval: '15 minutes'
+
     # Note that the session will be started ONLY if you read or write from it.
     session:
         # Sessions live in the database (see config/services.yaml) so they are

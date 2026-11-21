@@ -26,7 +26,7 @@ final class ItemImageResolver
             $this->awsS3Bucket,
             $this->awsRegion,
             trim($this->awsS3KeyPrefix, '/'),
-            $imageFilename,
+            rawurlencode($imageFilename),
         );
     }
 

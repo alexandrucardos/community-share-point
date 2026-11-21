@@ -16,8 +16,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 /**
  * Lists request/response log entries from the Monolog payload log files.
  *
- * Intentionally shows everything (all groups/users) — a diagnostic page,
- * currently open to ROLE_GUEST ("for now", per project decision).
+ * This diagnostic page is restricted to administrators and shows logs across
+ * groups; it must remain admin-only because the entries contain cross-group data.
  */
 final class HttpResponseLogController extends AbstractController
 {
@@ -25,7 +25,7 @@ final class HttpResponseLogController extends AbstractController
     private const DEFAULT_HTTP_CODE = Response::HTTP_INTERNAL_SERVER_ERROR;
 
     #[Route('/group/{uuid}/request-log', name: 'request_response_log', methods: ['GET'], requirements: ['uuid' => GroupRoute::UUID])]
-    #[IsGranted('ROLE_GUEST')]
+    #[IsGranted('ROLE_ADMIN')]
     public function __invoke(
         string $uuid,
         PayloadLogFileReader $reader,

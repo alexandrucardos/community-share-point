@@ -42,6 +42,7 @@ final class OtpLoginAuthenticator extends AbstractLoginFormAuthenticator
     public function __construct(
         private readonly GetUserByEmailAndGroupHandler $loadUserByEmailAndGroup,
         private readonly VerifyLoginOtpHandler         $verifyLoginOtp,
+        private readonly OtpRateLimiter                $otpRateLimiter,
         private readonly UrlGeneratorInterface         $urlGenerator,
     )
     {
@@ -60,7 +61,7 @@ final class OtpLoginAuthenticator extends AbstractLoginFormAuthenticator
         $groupId = $this->groupId($request);
 
         if ($email === '') {
-            throw new CustomUserMessageAuthenticationException('Your login code has expired, please request a new one.');
+            throw new CustomUserMessageAuthenticationException('That login code is not valid or has expired.');
         }
 
         $sessionUser = $this->toSessionUser($this->loadUser($email, $groupId));
@@ -68,7 +69,13 @@ final class OtpLoginAuthenticator extends AbstractLoginFormAuthenticator
         return new Passport(
             new UserBadge($sessionUser->id, static fn(): SecurityUser => new SecurityUser($sessionUser)),
             new CustomCredentials(
-                function (mixed $credentials) use ($email, $groupId): bool {
+                function (mixed $credentials) use ($email, $groupId, $request): bool {
+                    if (!$this->otpRateLimiter->allowVerification($email, $groupId, $request->getClientIp())) {
+                        throw new CustomUserMessageAuthenticationException(
+                            'That login code is not valid or has expired.',
+                        );
+                    }
+
                     try {
                         $this->verifyLoginOtp->handle(new VerifyLoginOtpCommand(
                             email: $email,

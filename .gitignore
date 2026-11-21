@@ -8,6 +8,7 @@ public/bundles/
 var/
 vendor/
 bin/
+.phpunit.result.cache
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###

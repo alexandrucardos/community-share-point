@@ -27,7 +27,7 @@ final class ResponsePayloadSubscriber implements EventSubscriberInterface
         '_password_confirmation',
         '_csrf_token',
         'current_password',
-        // Login codes: the form field and the prefilled ?code= from the email.
+        // Login codes submitted as a form field or query parameter.
         '_code',
         'code',
         'new_password',
@@ -62,7 +62,7 @@ final class ResponsePayloadSubscriber implements EventSubscriberInterface
         $record->route = is_string($request->attributes->get('_route'))
             ? $request->attributes->get('_route')
             : null;
-        $record->uri = $request->getRequestUri();
+        $record->uri = $request->getPathInfo();
         $record->ip = $request->getClientIp();
         $record->requestPayload = $requestPayload;
         $record->status = $response->getStatusCode();
@@ -84,7 +84,7 @@ final class ResponsePayloadSubscriber implements EventSubscriberInterface
         $this->requestPayloadLogger->info('Response.', [
             'method' => $request->getMethod(),
             'route' => $request->attributes->get('_route'),
-            'uri' => $request->getRequestUri(),
+            'uri' => $request->getPathInfo(),
             'ip' => $request->getClientIp(),
             'status' => $response->getStatusCode(),
             'content_type' => $response->headers->get('Content-Type'),

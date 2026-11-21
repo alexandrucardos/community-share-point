@@ -10,6 +10,7 @@ use App\Application\User\RequestLoginOtp\RequestLoginOtpCommand;
 use App\Application\User\RequestLoginOtp\RequestLoginOtpHandler;
 use App\Domain\User\Exception\EmailAndGroupAlreadyRegisteredException;
 use App\Service\Security\OtpLoginAuthenticator;
+use App\Service\Security\OtpRateLimiter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +24,7 @@ final class AuthController extends AbstractController
         string $uuid,
         Request $request,
         RequestLoginOtpHandler $requestLoginOtp,
+        OtpRateLimiter $otpRateLimiter,
         AuthenticationUtils $authenticationUtils,
     ): Response {
         if ($this->getUser() !== null) {
@@ -39,10 +41,12 @@ final class AuthController extends AbstractController
                 $errors[] = 'Invalid or expired form submission, please try again.';
             } else {
                 try {
-                    $requestLoginOtp->handle(new RequestLoginOtpCommand(
-                        email: $email,
-                        groupId: $uuid,
-                    ));
+                    if ($otpRateLimiter->allowRequest($email, $uuid, $request->getClientIp())) {
+                        $requestLoginOtp->handle(new RequestLoginOtpCommand(
+                            email: $email,
+                            groupId: $uuid,
+                        ));
+                    }
 
                     $request->getSession()->set(OtpLoginAuthenticator::SESSION_EMAIL, $email);
 
@@ -71,21 +75,13 @@ final class AuthController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // The code is prefilled when the login page is opened from the email link.
-        $code = (string) $request->query->get('code', '');
-
-        if (preg_match('/^\d{6}$/', $code) !== 1) {
-            $code = '';
-        }
-
         return $this->render('auth/login_verify.html.twig', [
             'email' => $email,
-            'code' => $code,
             'error' => $authenticationUtils->getLastAuthenticationError(),
         ]);
     }
 
-    #[Route('/logout', name: 'app_logout', methods: ['GET'])]
+    #[Route('/logout', name: 'app_logout', methods: ['POST'])]
     public function logout(): never
     {
         throw new \LogicException('This method is intercepted by the logout key on the firewall.');

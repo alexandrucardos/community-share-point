@@ -98,6 +98,16 @@ final class ItemEntity
         $this->fileName = $fileName;
     }
 
+    /**
+     * Storage keys are generated here, from the item id and the validated
+     * extension, so a client-supplied filename never becomes an object key and
+     * two items can never share one.
+     */
+    private function generateFileName(): void
+    {
+        $this->fileName = $this->id->value.'.'.$this->fileExtension->value;
+    }
+
     public function getFileSize(): int
     {
         return $this->fileSize;
@@ -119,5 +129,9 @@ final class ItemEntity
     public function setContainsFile(bool $containsFile): void
     {
         $this->containsFile = $containsFile;
+
+        if ($containsFile && isset($this->fileExtension)) {
+            $this->generateFileName();
+        }
     }
 }

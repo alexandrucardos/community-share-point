@@ -32,6 +32,26 @@ final class ImageUploader
             return;
         }
 
+        $this->deleteObject($fileName);
+    }
+
+    /**
+     * Deletes only keys shaped like a domain-generated name, so a legacy
+     * client-supplied filename can never target an object it does not own.
+     */
+    public function deleteByFileName(string $fileName): void
+    {
+        $generatedName = '/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\\.(?:'.implode('|', FileExtension::all()).')$/i';
+
+        if (!preg_match($generatedName, $fileName)) {
+            return;
+        }
+
+        $this->deleteObject($fileName);
+    }
+
+    private function deleteObject(string $fileName): void
+    {
         $this->s3->deleteObject([
             'Bucket' => $this->awsS3Bucket,
             'Key' => $this->key($fileName),
