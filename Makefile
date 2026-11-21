@@ -1,5 +1,5 @@
 PROJECT_NAME := community-sharepoint
-ZIP_NAME := $(PROJECT_NAME)-v21.zip
+ZIP_NAME := $(PROJECT_NAME)-v23.zip
 
 all: install assets zip
 
@@ -40,3 +40,6 @@ test-coverage:
 
 ngrok-up:
 	ngrok http --host-header=comm.localhost 80
+
+fe-refresh:
+	php bin/console asset-map:compile --env=prod

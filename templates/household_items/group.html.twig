@@ -22,8 +22,8 @@
         </div>
 
         {# Collapsed until the magnifier is clicked; stays open when a filter is applied. #}
-        <form class="items-filter" id="items-filter" method="get" action="{{ path('household_items_group') }}"
-              {% if name is empty %}hidden{% endif %}
+        <form class="items-filter{{ name is not empty ? ' items-filter--open' : '' }}" id="items-filter" method="get"
+              action="{{ path('household_items_group') }}"
               data-items-search-target="field" data-action="keydown.esc->items-search#close">
             <label class="items-filter__label" for="item-name-filter">{{ 'Filter by name'|trans }}</label>
             <input class="items-filter__input" id="item-name-filter" type="search" name="name"
