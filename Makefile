@@ -40,3 +40,6 @@ test-coverage:
 
 ngrok-up:
 	ngrok http --host-header=comm.localhost 80
+
+fe-refresh:
+	php bin/console asset-map:compile --env=prod

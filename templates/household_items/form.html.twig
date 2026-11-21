@@ -17,7 +17,8 @@
                 </div>
             {% endif %}
 
-            <form method="post" action="{{ formAction }}" class="auth-form" enctype="multipart/form-data" id="item-form">
+            <form method="post" action="{{ formAction }}" class="auth-form" enctype="multipart/form-data" id="item-form"
+                  data-controller="item-form-loading" data-action="submit->item-form-loading#show">
                 <img id="image-preview" class="item-form-image"{% if currentImageUrl %} src="{{ currentImageUrl }}"{% else %} hidden{% endif %} alt="{{ 'Photo'|trans }}">
 
                 <input class="photo-picker__input" type="file" id="image" name="image" accept="image/png,image/jpeg,image/gif,image/webp" capture="environment" hidden>
@@ -29,7 +30,7 @@
                 </label>
 
                 <label for="name">{{ 'Name'|trans }}</label>
-                <input type="text" id="name" name="name" value="{{ name }}" required autofocus>
+                <input type="text" id="name" name="name" value="{{ name }}" required>
 
                 <label for="description">{{ 'Description'|trans }}</label>
                 <textarea id="description" name="description" rows="4" required>{{ description }}</textarea>
@@ -44,21 +45,29 @@
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('item_form') }}">
 
                 {% if not isEdit %}
-                    <button type="submit">{{ 'Add item'|trans }}</button>
+                    <div class="item-form__actions">
+                        <button type="submit" class="item-form__add">{{ 'Add item'|trans }}</button>
+                        <a class="button item-form__back" href="{{ path('household_items_index') }}">{{ 'Back'|trans }}</a>
+                    </div>
                 {% endif %}
+
+                <div class="item-form__loading" data-item-form-loading-target="overlay" role="status" hidden>
+                    <span class="item-form__loading-spinner" aria-hidden="true"></span>
+                    <span>{{ 'Saving…'|trans }}</span>
+                </div>
             </form>
 
             {% if isEdit %}
                 <div class="item-form__actions">
-                    <button type="submit" form="item-form" class="item-form__save">{{ 'Save changes'|trans }}</button>
                     <form method="post" action="{{ deleteAction }}" class="item-form__delete-form" onsubmit="return confirm('{{ 'Are you sure you want to delete this item?'|trans|e('js') }}');">
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('delete_item_' ~ itemId) }}">
                         <button type="submit" class="item-card__delete">{{ 'Delete'|trans }}</button>
                     </form>
+                    <button type="submit" form="item-form" class="item-form__save">{{ 'Save'|trans }}</button>
+                    <a class="button item-form__back" href="{{ path('household_items_index') }}">{{ 'Back'|trans }}</a>
                 </div>
             {% endif %}
 
-            <p class="auth-switch"><a href="{{ path('household_items_index') }}">{{ 'Back to My Items'|trans }}</a></p>
         </div>
     </main>
 {% endblock %}

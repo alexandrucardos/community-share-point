@@ -64,6 +64,7 @@ body {
 
 @media (max-width: 640px) {
     body {
+        --menu-fab-center: calc(50% + 120px);
         padding-top: 0;
     }
 
@@ -81,14 +82,17 @@ body {
 
     .app-nav__burger {
         position: fixed;
-        right: calc(1.5rem + env(safe-area-inset-right));
+        right: auto;
         bottom: calc(1rem + env(safe-area-inset-bottom));
+        left: var(--menu-fab-center);
         z-index: 102;
         display: flex;
-        width: 56px;
-        height: 56px;
+        width: 64px;
+        height: 64px;
+        transform: translateX(-50%);
         border-radius: 50%;
-        background: #2563eb;
+        background: #374151;
+        opacity: 0.8;
         box-shadow: 0 4px 12px rgba(17, 24, 39, 0.25);
     }
 
@@ -122,8 +126,10 @@ body {
     }
 
     .items-add-fab {
-        right: calc(1.5rem + 56px + 0.75rem + env(safe-area-inset-right));
-        bottom: calc(1rem + env(safe-area-inset-bottom));
+        right: auto;
+        bottom: calc(1.25rem + env(safe-area-inset-bottom));
+        left: calc(var(--menu-fab-center) - 32px - 0.5rem - 28px);
+        transform: translateX(-50%);
     }
 
     .items-context-fab svg {
@@ -134,6 +140,33 @@ body {
     .items-context-fab:focus-visible {
         outline: 3px solid rgba(37, 99, 235, 0.35);
         outline-offset: 3px;
+    }
+
+    .items-page .items-page__header .items-search-toggle {
+        position: fixed;
+        right: auto;
+        bottom: calc(1rem + 64px + 0.75rem + env(safe-area-inset-bottom));
+        left: var(--menu-fab-center);
+        z-index: 101;
+        width: 56px;
+        height: 56px;
+        transform: translateX(-50%);
+        border: 0;
+        border-radius: 50%;
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(17, 24, 39, 0.25);
+    }
+
+    .items-page .items-page__header .items-search-toggle svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .items-page .items-page__header .items-search-toggle:hover {
+        border-color: transparent;
+        background: #1d4ed8;
+        color: #ffffff;
     }
 
     .app-nav__links {
@@ -161,6 +194,10 @@ body {
 
     body:has(.items-context-fab:not(.items-add-fab)) .app-nav__links {
         bottom: calc(1rem + 56px + 0.75rem + 56px + 0.75rem + env(safe-area-inset-bottom));
+    }
+
+    body:has(.items-search-toggle) .app-nav__links {
+        bottom: calc(1rem + 64px + 0.75rem + 56px + 0.75rem + env(safe-area-inset-bottom));
     }
 
     .app-nav__links a,
@@ -424,10 +461,73 @@ body {
     margin-top: 1.25rem;
 }
 
-.item-form__save {
+/* Full-screen feedback while the item is uploaded and saved. */
+.item-form__loading {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    background: rgba(17, 24, 39, 0.6);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.item-form__loading[hidden] {
+    display: none;
+}
+
+.item-form__loading-spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: item-form-spin 0.8s linear infinite;
+}
+
+@keyframes item-form-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.item-form__actions .item-form__save {
     flex: 1 1 auto;
     min-width: 0;
     margin-top: 0 !important;
+    background: #16a34a;
+}
+
+.item-form__actions .item-form__save:hover {
+    background: #15803d;
+}
+
+.auth-form .item-form__add {
+    background: #16a34a;
+}
+
+.auth-form .item-form__add:hover {
+    background: #15803d;
+}
+
+.item-form__actions .item-form__save,
+.item-form__actions .item-form__add,
+.item-form__back {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-top: 0;
+    padding-right: 0.35rem;
+    padding-left: 0.35rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.item-form__back {
+    white-space: normal;
 }
 
 .item-form__delete-form {
@@ -577,9 +677,32 @@ body {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* `hidden` must win over the class's own display value. */
-.items-filter[hidden] {
-    display: none;
+/* Collapsed by default; the magnifier toggles `.items-filter--open`. */
+.items-filter {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-0.25rem);
+    pointer-events: none;
+    /* visibility flips instantly: a slow paint must never leave it stuck hidden. */
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.items-filter--open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+}
+
+/* On larger screens the form only takes up space while it is open. */
+@media (min-width: 641px) {
+    .items-filter {
+        display: none;
+    }
+
+    .items-filter--open {
+        display: flex;
+    }
 }
 
 .items-filter__label {
@@ -643,6 +766,27 @@ body {
 }
 
 @media (max-width: 640px) {
+    /* Sits beside the floating magnifier button, sliding in from its side. */
+    .items-page .items-filter {
+        position: fixed;
+        right: calc(100% - var(--menu-fab-center) + 28px + 0.5rem);
+        bottom: calc(1rem + 64px + 0.75rem + env(safe-area-inset-bottom));
+        left: auto;
+        z-index: 101;
+        box-sizing: border-box;
+        flex-direction: column;
+        align-items: stretch;
+        width: min(240px, calc(100vw - 5rem));
+        margin: 0;
+        padding: 0.75rem;
+        transform-origin: right center;
+        transform: translateX(0.75rem) scale(0.96);
+    }
+
+    .items-page .items-filter--open {
+        transform: none;
+    }
+
     .items-filter__input {
         flex: 1 1 100%;
         max-width: none;
